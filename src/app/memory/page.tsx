@@ -129,6 +129,17 @@ export default function MemoryPage() {
     }
   }
 
+  const sortNodes = (nodes: TreeNode[]): TreeNode[] => {
+    return nodes.sort((a, b) => {
+      // Folders first
+      if (a.isDirectory && !b.isDirectory) return -1
+      if (!a.isDirectory && b.isDirectory) return 1
+      
+      // Then alphabetically (case insensitive)
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    })
+  }
+
   const buildTree = () => {
     const filteredFiles = files.filter(file => {
       if (searchQuery && !file.name.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -182,7 +193,18 @@ export default function MemoryPage() {
       })
     })
 
-    setTreeData(tree)
+    // Sort all nodes recursively
+    const sortTreeRecursive = (nodes: TreeNode[]): TreeNode[] => {
+      const sorted = sortNodes(nodes)
+      sorted.forEach(node => {
+        if (node.children) {
+          node.children = sortTreeRecursive(node.children)
+        }
+      })
+      return sorted
+    }
+
+    setTreeData(sortTreeRecursive(tree))
   }
 
   const toggleNode = (node: TreeNode) => {
