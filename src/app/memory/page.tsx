@@ -5,7 +5,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { FileText, Folder, FolderOpen, ChevronRight, ChevronDown, Save, X, Search, List, FolderTree } from "lucide-react"
+import { MarkdownPreview } from "@/components/markdown-preview"
+import { FileText, Folder, FolderOpen, ChevronRight, ChevronDown, Save, X, Search, List, FolderTree, Eye, Edit3 } from "lucide-react"
 
 interface MemoryFile {
   name: string
@@ -58,6 +59,7 @@ export default function MemoryPage() {
   const [fileTags, setFileTags] = useState<Record<string, string[]>>({})
   const [viewMode, setViewMode] = useState<'tree' | 'list'>('tree')
   const [treeData, setTreeData] = useState<TreeNode[]>([])
+  const [editorMode, setEditorMode] = useState<'edit' | 'preview'>('edit')
 
   useEffect(() => {
     loadTagsConfig()
@@ -477,6 +479,22 @@ export default function MemoryPage() {
                     Unsaved
                   </Badge>
                 )}
+                <div className="flex gap-1 mr-2">
+                  <Button
+                    onClick={() => setEditorMode('edit')}
+                    variant={editorMode === 'edit' ? 'default' : 'outline'}
+                    size="sm"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    onClick={() => setEditorMode('preview')}
+                    variant={editorMode === 'preview' ? 'default' : 'outline'}
+                    size="sm"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Button
                   onClick={() => {
                     setSelectedFile(null)
@@ -503,13 +521,19 @@ export default function MemoryPage() {
         </CardHeader>
         <div className="flex-1 overflow-hidden">
           {selectedFile ? (
-            <textarea
-              value={fileContent}
-              onChange={(e) => setFileContent(e.target.value)}
-              className="w-full h-full p-6 bg-transparent font-mono text-sm resize-none focus:outline-none"
-              placeholder="File content..."
-              spellCheck={false}
-            />
+            editorMode === 'edit' ? (
+              <textarea
+                value={fileContent}
+                onChange={(e) => setFileContent(e.target.value)}
+                className="w-full h-full p-6 bg-transparent font-mono text-sm resize-none focus:outline-none"
+                placeholder="File content..."
+                spellCheck={false}
+              />
+            ) : (
+              <div className="w-full h-full overflow-y-auto p-6">
+                <MarkdownPreview content={fileContent} />
+              </div>
+            )
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               <div className="text-center">

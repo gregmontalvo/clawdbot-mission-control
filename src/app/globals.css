@@ -124,3 +124,87 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Markdown Preview Enhancements */
+.markdown-preview {
+  /* Better spacing between elements */
+  & > * + * {
+    margin-top: 1em;
+  }
+
+  /* Code syntax highlighting fallback */
+  pre code {
+    display: block;
+    padding: 0;
+    background: transparent;
+  }
+
+  /* Better table styling */
+  table {
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  /* Task list items */
+  li:has(> input[type="checkbox"]) {
+    list-style: none;
+    margin-left: -1.5rem;
+  }
+
+  /* Inline code in headings */
+  h1 code,
+  h2 code,
+  h3 code,
+  h4 code,
+  h5 code,
+  h6 code {
+    font-size: 0.9em;
+  }
+
+  /* Nested lists */
+  ul ul,
+  ol ul,
+  ul ol,
+  ol ol {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  /* Horizontal rules */
+  hr {
+    height: 2px;
+    border: none;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--border),
+      transparent
+    );
+  }
+
+  /* Callouts (Obsidian-style) */
+  blockquote:has(> p:first-child > strong:first-child) {
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    background: var(--muted);
+  }
+
+  /* Better link styling */
+  a[href^="http"]::after {
+    content: " ↗";
+    font-size: 0.8em;
+    opacity: 0.5;
+  }
+
+  /* Better heading anchors */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    position: relative;
+    scroll-margin-top: 4rem;
+  }
+}
