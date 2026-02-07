@@ -1,0 +1,97 @@
+{
+  "tags": {
+    "core": {
+      "label": "Core",
+      "color": "red",
+      "description": "Archivos fundamentales del sistema"
+    },
+    "memory": {
+      "label": "Memory",
+      "color": "purple",
+      "description": "Memoria a largo plazo y notas diarias"
+    },
+    "client": {
+      "label": "Client",
+      "color": "blue",
+      "description": "Información de clientes"
+    },
+    "skill": {
+      "label": "Skill",
+      "color": "green",
+      "description": "Documentación de skills"
+    },
+    "project": {
+      "label": "Project",
+      "color": "orange",
+      "description": "Proyectos en curso"
+    },
+    "research": {
+      "label": "Research",
+      "color": "cyan",
+      "description": "Investigación y análisis"
+    },
+    "template": {
+      "label": "Template",
+      "color": "gray",
+      "description": "Templates y ejemplos"
+    },
+    "config": {
+      "label": "Config",
+      "color": "yellow",
+      "description": "Configuración y setup"
+    },
+    "archive": {
+      "label": "Archive",
+      "color": "slate",
+      "description": "Archivado / referencia histórica"
+    }
+  },
+  "fileTags": {
+    "AGENTS.md": ["core"],
+    "SOUL.md": ["core"],
+    "USER.md": ["core"],
+    "IDENTITY.md": ["core"],
+    "HEARTBEAT.md": ["core", "config"],
+    "BOOTSTRAP.md": ["core"],
+    "SECURITY.md": ["core"],
+    "TOOLS.md": ["core"],
+    "MEMORY.md": ["memory"],
+    "memory/2026-02-07.md": ["memory"],
+    "memory/2026-02-06.md": ["memory"],
+    "memory/2026-02-05.md": ["memory"],
+    "memory/2026-02-04.md": ["memory"],
+    "memory/2026-02-03.md": ["memory"],
+    "memory/2026-02-02.md": ["memory"],
+    "memory/2026-02-01.md": ["memory"],
+    "memory/2026-01-31.md": ["memory"],
+    "memory/2026-01-30.md": ["memory"],
+    "memory/2026-01-29.md": ["memory"],
+    "memory/2026-01-28.md": ["memory"],
+    "memory/2026-01-27.md": ["memory"],
+    "memory/projects-open.md": ["memory", "project"],
+    "memory/twitter-log.md": ["memory", "project"],
+    "memory/outreach-log.md": ["memory", "project"],
+    "memory/marketing-learnings.md": ["memory", "research"],
+    "memory/twitter-learnings.md": ["memory", "research"],
+    "skills/badge-creator/SKILL.md": ["skill"],
+    "skills/badge-icon-library/SKILL.md": ["skill"],
+    "skills/badgie-crm/SKILL.md": ["skill"],
+    "skills/badgie-database/SKILL.md": ["skill"],
+    "skills/client-content-creator/SKILL.md": ["skill"],
+    "skills/google-workspace/SKILL.md": ["skill"],
+    "skills/marketing-director/SKILL.md": ["skill"],
+    "skills/marketing-outbound/SKILL.md": ["skill"],
+    "skills/twitter/SKILL.md": ["skill"],
+    "skills/twitter-ceo/SKILL.md": ["skill"],
+    "skills/sports-directory/SKILL.md": ["skill"],
+    "samples/elianers/CLIENT.md": ["client"],
+    "samples/freddy-santos/CLIENT.md": ["client"],
+    "samples/telemark/CLIENT.md": ["client"],
+    "memory/2026-01-29-usa-competitors-report.md": ["research"],
+    "memory/2026-02-04-badgie-intelligence-portal.md": ["project"],
+    "memory/badgie-deep-dive.md": ["research"],
+    "memory/badgie-wiki-reference.md": ["research"],
+    "TEMPLATE-instagram-report.md": ["template"],
+    "README.md": ["config"]
+  }
+}

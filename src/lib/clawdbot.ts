@@ -106,28 +106,36 @@ const WORKSPACE = '/Users/macmini/clawd'
 export async function listMemoryFiles(): Promise<MemoryFile[]> {
   const files: MemoryFile[] = []
   
-  async function scanDirectory(dir: string, baseDir: string = dir) {
+  // Directories to skip
+  const SKIP_DIRS = new Set([
+    'node_modules',
+    '.git',
+    '.next',
+    'dist',
+    'build',
+    'out',
+    '.cache',
+    '.remotion',
+    'coverage'
+  ])
+  
+  async function scanDirectory(dir: string, baseDir: string = dir, depth: number = 0) {
+    // Limit depth to prevent infinite loops
+    if (depth > 10) return
+    
     const entries = await readdir(dir)
     
     for (const entry of entries) {
+      // Skip hidden files and excluded directories
+      if (entry.startsWith('.') || SKIP_DIRS.has(entry)) continue
+      
       const fullPath = join(dir, entry)
       const stats = await stat(fullPath)
       const relativePath = fullPath.replace(baseDir + '/', '')
       
-      if (entry.startsWith('.')) continue // Skip hidden files
-      
       if (stats.isDirectory()) {
-        files.push({
-          name: entry,
-          path: fullPath,
-          relativePath,
-          size: 0,
-          modified: stats.mtime,
-          isDirectory: true
-        })
-        
         // Recursively scan subdirectories
-        await scanDirectory(fullPath, baseDir)
+        await scanDirectory(fullPath, baseDir, depth + 1)
       } else if (entry.endsWith('.md')) {
         files.push({
           name: entry,
@@ -142,21 +150,11 @@ export async function listMemoryFiles(): Promise<MemoryFile[]> {
   }
   
   try {
-    // Scan workspace root for .md files
+    // Scan workspace root
     await scanDirectory(WORKSPACE)
     
-    // Also scan memory directory
-    const memoryDir = join(WORKSPACE, 'memory')
-    try {
-      await scanDirectory(memoryDir)
-    } catch (e) {
-      // Memory dir might not exist
-    }
-    
     return files.sort((a, b) => {
-      // Directories first, then by name
-      if (a.isDirectory && !b.isDirectory) return -1
-      if (!a.isDirectory && b.isDirectory) return 1
+      // Sort by relative path
       return a.relativePath.localeCompare(b.relativePath)
     })
   } catch (error) {
