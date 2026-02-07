@@ -52,14 +52,31 @@ type SortDirection = 'asc' | 'desc'
 type CronType = 'recurring' | 'oneoff'
 
 // Detect if a cron is recurring or one-off based on schedule
-function getCronType(schedule: CronJob['schedule']): CronType {
+function getCronType(schedule: CronJob['schedule'], name: string): CronType {
   const expr = schedule.expr
-  // Recurring patterns: contains * or / (cron expressions)
-  // One-off: specific date/time (usually just numbers)
-  if (expr.includes('*') || expr.includes('/')) {
-    return 'recurring'
+  
+  // Check name for reminders/recordatorios
+  const nameIndicatesOneOff = 
+    name.toLowerCase().includes('recordatorio') ||
+    name.toLowerCase().includes('reminder')
+  
+  // Parse cron expression: minute hour day month dayOfWeek
+  const parts = expr.split(' ')
+  if (parts.length >= 5) {
+    const day = parts[2]
+    const month = parts[3]
+    
+    // If both day and month are specific numbers (not * or */), it's a one-off
+    const hasSpecificDate = 
+      day !== '*' && !day.includes('/') && !day.includes(',') &&
+      month !== '*' && !month.includes('/') && !month.includes(',')
+    
+    if (hasSpecificDate || nameIndicatesOneOff) {
+      return 'oneoff'
+    }
   }
-  return 'oneoff'
+  
+  return 'recurring'
 }
 
 export default function CronsPage() {
@@ -126,7 +143,7 @@ export default function CronsPage() {
       const matchesDisabled = showDisabled || cron.enabled
       
       // Filter by tab
-      const cronType = getCronType(cron.schedule)
+      const cronType = getCronType(cron.schedule, cron.name)
       const matchesTab = activeTab === 'all' || 
                         (activeTab === 'recurring' && cronType === 'recurring') ||
                         (activeTab === 'oneoff' && cronType === 'oneoff')
@@ -176,8 +193,8 @@ export default function CronsPage() {
     disabled: crons.filter(c => !c.enabled).length,
     errors: crons.filter(c => c.state?.lastStatus === 'error').length,
     ok: crons.filter(c => c.state?.lastStatus === 'ok').length,
-    recurring: crons.filter(c => getCronType(c.schedule) === 'recurring').length,
-    oneoff: crons.filter(c => getCronType(c.schedule) === 'oneoff').length,
+    recurring: crons.filter(c => getCronType(c.schedule, c.name) === 'recurring').length,
+    oneoff: crons.filter(c => getCronType(c.schedule, c.name) === 'oneoff').length,
   }), [crons])
 
   if (loading) {
@@ -284,7 +301,7 @@ export default function CronsPage() {
               {paginatedCrons.map((cron) => {
                 const statusInfo = getStatusInfo(cron)
                 const StatusIcon = statusInfo.icon
-                const cronType = getCronType(cron.schedule)
+                const cronType = getCronType(cron.schedule, cron.name)
                 
                 return (
                   <TableRow key={cron.id} className="h-12">
