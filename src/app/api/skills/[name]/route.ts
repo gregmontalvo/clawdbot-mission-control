@@ -7,14 +7,15 @@ const SKILLS_DIR = join(WORKSPACE, 'skills')
 
 export async function GET(
   request: Request,
-  { params }: { params: { name: string } }
+  { params }: { params: Promise<{ name: string }> }
 ) {
   try {
-    const skillPath = join(SKILLS_DIR, params.name, 'SKILL.md')
+    const { name } = await params
+    const skillPath = join(SKILLS_DIR, name, 'SKILL.md')
     const content = await readFile(skillPath, 'utf-8')
     
     return NextResponse.json({
-      name: params.name,
+      name,
       path: skillPath,
       content
     })
@@ -29,11 +30,12 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { name: string } }
+  { params }: { params: Promise<{ name: string }> }
 ) {
   try {
+    const { name } = await params
     const { content } = await request.json()
-    const skillPath = join(SKILLS_DIR, params.name, 'SKILL.md')
+    const skillPath = join(SKILLS_DIR, name, 'SKILL.md')
     
     await writeFile(skillPath, content, 'utf-8')
     
