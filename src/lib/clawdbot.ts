@@ -1,6 +1,7 @@
 /**
  * Direct Clawdbot CLI interface
  */
+import 'server-only'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { readFile, writeFile, readdir, stat } from 'fs/promises'

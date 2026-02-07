@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { listCrons } from "@/lib/clawdbot"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -67,8 +66,10 @@ export default function CronsPage() {
   const loadCrons = async () => {
     setLoading(true)
     try {
-      const data = await listCrons()
-      setCrons(data)
+      const response = await fetch('/api/crons')
+      if (!response.ok) throw new Error('Failed to fetch crons')
+      const data = await response.json()
+      setCrons(data.crons || [])
     } catch (error) {
       console.error('Failed to load crons:', error)
     } finally {
