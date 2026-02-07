@@ -232,7 +232,7 @@ export default function SkillsPage() {
 
               {/* Content */}
               {viewMode === 'view' ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none overflow-y-auto max-h-[calc(100vh-300px)] px-4 prose-p:my-4 prose-headings:mt-6 prose-headings:mb-4 prose-ul:my-4 prose-li:my-1 prose-pre:my-4 prose-blockquote:my-4">
+                <div className="prose prose-base dark:prose-invert max-w-none overflow-y-auto max-h-[calc(100vh-300px)] px-4 [&>*]:my-6 [&>h1]:mt-10 [&>h1]:mb-6 [&>h2]:mt-8 [&>h2]:mb-5 [&>h3]:mt-6 [&>h3]:mb-4 [&>ul]:my-6 [&>ul]:space-y-3 [&>ol]:my-6 [&>ol]:space-y-3 [&>pre]:my-6 [&>blockquote]:my-6 [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm">
                   <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
                     {editedContent}
                   </ReactMarkdown>
