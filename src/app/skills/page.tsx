@@ -13,7 +13,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle, RefreshCw } from "lucide-react"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { Textarea } from "@/components/ui/textarea"
+import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle, RefreshCw, Save, ExternalLink } from "lucide-react"
 
 interface Skill {
   name: string
@@ -22,9 +30,19 @@ interface Skill {
   hasSkillMd: boolean
 }
 
+interface SkillDetail {
+  name: string
+  path: string
+  content: string
+}
+
 export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedSkill, setSelectedSkill] = useState<SkillDetail | null>(null)
+  const [editedContent, setEditedContent] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [loadingDetail, setLoadingDetail] = useState(false)
 
   useEffect(() => {
     loadSkills()
@@ -41,6 +59,47 @@ export default function SkillsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const loadSkillDetail = async (skillName: string) => {
+    setLoadingDetail(true)
+    try {
+      const response = await fetch(`/api/skills/${skillName}`)
+      const data = await response.json()
+      setSelectedSkill(data)
+      setEditedContent(data.content)
+    } catch (error) {
+      console.error('Failed to load skill detail:', error)
+    } finally {
+      setLoadingDetail(false)
+    }
+  }
+
+  const saveSkill = async () => {
+    if (!selectedSkill) return
+    
+    setSaving(true)
+    try {
+      await fetch(`/api/skills/${selectedSkill.name}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editedContent })
+      })
+      
+      // Update local state
+      if (selectedSkill) {
+        setSelectedSkill({ ...selectedSkill, content: editedContent })
+      }
+    } catch (error) {
+      console.error('Failed to save skill:', error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const closeSheet = () => {
+    setSelectedSkill(null)
+    setEditedContent('')
   }
   
   const skillsWithDocs = skills.filter(s => s.hasSkillMd)
@@ -99,22 +158,91 @@ export default function SkillsPage() {
         </TabsList>
 
         <TabsContent value="all">
-          <SkillsTable skills={skills} />
+          <SkillsTable skills={skills} onViewDocs={loadSkillDetail} />
         </TabsContent>
 
         <TabsContent value="documented">
-          <SkillsTable skills={skillsWithDocs} />
+          <SkillsTable skills={skillsWithDocs} onViewDocs={loadSkillDetail} />
         </TabsContent>
 
         <TabsContent value="missing">
-          <SkillsTable skills={skillsWithoutDocs} />
+          <SkillsTable skills={skillsWithoutDocs} onViewDocs={loadSkillDetail} />
         </TabsContent>
       </Tabs>
+
+      {/* Skill Detail Sidesheet */}
+      <Sheet open={!!selectedSkill} onOpenChange={(open) => !open && closeSheet()}>
+        <SheetContent className="sm:max-w-4xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {selectedSkill?.name}
+            </SheetTitle>
+            <SheetDescription className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-muted-foreground">{selectedSkill?.path}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 px-1"
+                asChild
+              >
+                <a href={`file://${selectedSkill?.path}`} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </Button>
+            </SheetDescription>
+          </SheetHeader>
+
+          {loadingDetail ? (
+            <div className="flex items-center justify-center h-64">
+              <RefreshCw className="h-8 w-8 animate-spin opacity-50" />
+            </div>
+          ) : (
+            <div className="mt-6 space-y-4">
+              <Textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="min-h-[calc(100vh-250px)] font-mono text-sm"
+                placeholder="Edit skill documentation..."
+              />
+              
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="text-xs text-muted-foreground">
+                  {editedContent !== selectedSkill?.content && (
+                    <span className="text-orange-500">• Unsaved changes</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={closeSheet}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={saveSkill}
+                    disabled={saving || editedContent === selectedSkill?.content}
+                  >
+                    {saving ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
 
-function SkillsTable({ skills }: { skills: any[] }) {
+function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (name: string) => void }) {
   if (skills.length === 0) {
     return (
       <Card>
@@ -184,12 +312,10 @@ function SkillsTable({ skills }: { skills: any[] }) {
                         variant="ghost"
                         size="sm"
                         className="h-7 px-2"
-                        asChild
+                        onClick={() => onViewDocs(skill.name)}
                       >
-                        <a href={`file://${skill.path}/SKILL.md`} target="_blank" rel="noopener noreferrer">
-                          <FileText className="h-3 w-3 mr-1" />
-                          Docs
-                        </a>
+                        <FileText className="h-3 w-3 mr-1" />
+                        Docs
                       </Button>
                     )}
                   </div>
