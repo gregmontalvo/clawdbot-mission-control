@@ -142,97 +142,97 @@ export default function CalendarioPage() {
     return (
       <div className="p-8">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-          <p className="text-sm text-gray-500">Cargando calendario...</p>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Cargando calendario...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-auto bg-gray-50 p-4">
+    <div className="h-screen overflow-auto bg-background p-4">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           📅 Calendario de Cron Jobs
         </h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           {jobs.length} tareas activas • Hora Madrid
         </p>
       </div>
 
       {/* Legend */}
-      <div className="mb-4 flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-3">
+      <div className="mb-4 flex flex-wrap gap-2 rounded-lg border border-border bg-card p-3">
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#1DA1F2" }}
           />
-          <span className="text-xs text-gray-600">Twitter</span>
+          <span className="text-xs text-muted-foreground">Twitter</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#EA4335" }}
           />
-          <span className="text-xs text-gray-600">Email</span>
+          <span className="text-xs text-muted-foreground">Email</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#34A853" }}
           />
-          <span className="text-xs text-gray-600">Reportes</span>
+          <span className="text-xs text-muted-foreground">Reportes</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#E4405F" }}
           />
-          <span className="text-xs text-gray-600">Instagram</span>
+          <span className="text-xs text-muted-foreground">Instagram</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#0668E1" }}
           />
-          <span className="text-xs text-gray-600">Meta Ads</span>
+          <span className="text-xs text-muted-foreground">Meta Ads</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#7B68EE" }}
           />
-          <span className="text-xs text-gray-600">CRM</span>
+          <span className="text-xs text-muted-foreground">CRM</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#F97316" }}
           />
-          <span className="text-xs text-gray-600">Spiders</span>
+          <span className="text-xs text-muted-foreground">Spiders</span>
         </div>
         <div className="flex items-center gap-1">
           <div
             className="h-3 w-3 rounded"
             style={{ backgroundColor: "#EC4899" }}
           />
-          <span className="text-xs text-gray-600">Recordatorios</span>
+          <span className="text-xs text-muted-foreground">Recordatorios</span>
         </div>
       </div>
 
       {/* Calendar Grid */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
         <div className="grid min-w-[1200px] grid-cols-8">
           {/* Header */}
-          <div className="sticky left-0 z-10 border-b border-r border-gray-200 bg-gray-50 p-2">
-            <span className="text-xs font-medium text-gray-500">Hora</span>
+          <div className="sticky left-0 z-10 border-b border-r border-border bg-muted p-2">
+            <span className="text-xs font-medium text-muted-foreground">Hora</span>
           </div>
           {DAYS.map((day) => (
             <div
               key={day}
-              className="border-b border-r border-gray-200 bg-gray-50 p-2 text-center"
+              className="border-b border-r border-border bg-muted p-2 text-center"
             >
-              <span className="text-xs font-medium text-gray-700">
+              <span className="text-xs font-medium text-foreground">
                 {day}
               </span>
             </div>
@@ -243,9 +243,9 @@ export default function CalendarioPage() {
             <>
               <div
                 key={`hour-${hour}`}
-                className="sticky left-0 z-10 border-b border-r border-gray-200 bg-white p-2"
+                className="sticky left-0 z-10 border-b border-r border-border bg-card p-2"
               >
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-muted-foreground">
                   {hour.toString().padStart(2, "0")}:00
                 </span>
               </div>
@@ -256,7 +256,7 @@ export default function CalendarioPage() {
                 return (
                   <div
                     key={`${hour}-${dayIndex}`}
-                    className="relative min-h-[60px] border-b border-r border-gray-100 p-1"
+                    className="relative min-h-[60px] border-b border-r border-border p-1"
                   >
                     <div className="flex flex-col gap-1">
                       {cellEvents.map((event, idx) => (
@@ -270,11 +270,11 @@ export default function CalendarioPage() {
                             {event.name}
                           </div>
                           {/* Tooltip on hover */}
-                          <div className="pointer-events-none absolute left-0 top-full z-20 mt-1 hidden w-64 rounded border border-gray-200 bg-white p-2 text-gray-700 shadow-lg group-hover:block">
+                          <div className="pointer-events-none absolute left-0 top-full z-20 mt-1 hidden w-64 rounded border border-border bg-popover p-2 text-popover-foreground shadow-lg group-hover:block">
                             <div className="text-xs font-semibold">
                               {event.name}
                             </div>
-                            <div className="mt-1 text-xs text-gray-500">
+                            <div className="mt-1 text-xs text-muted-foreground">
                               {cronstrue.toString(event.description, {
                                 locale: "es",
                               })}
