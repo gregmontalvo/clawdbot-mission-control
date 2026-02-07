@@ -5,7 +5,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { FileText, Folder, Save, X, Search } from "lucide-react"
+import { FileText, Folder, FolderOpen, ChevronRight, ChevronDown, Save, X, Search, List, FolderTree } from "lucide-react"
 
 interface MemoryFile {
   name: string
@@ -21,6 +21,16 @@ interface TagConfig {
   label: string
   color: string
   description: string
+}
+
+interface TreeNode {
+  name: string
+  path: string
+  relativePath: string
+  isDirectory: boolean
+  children?: TreeNode[]
+  file?: MemoryFile
+  expanded?: boolean
 }
 
 const TAG_COLORS: Record<string, string> = {
@@ -46,11 +56,19 @@ export default function MemoryPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [tags, setTags] = useState<Record<string, TagConfig>>({})
   const [fileTags, setFileTags] = useState<Record<string, string[]>>({})
+  const [viewMode, setViewMode] = useState<'tree' | 'list'>('tree')
+  const [treeData, setTreeData] = useState<TreeNode[]>([])
 
   useEffect(() => {
     loadTagsConfig()
     loadFiles()
   }, [])
+
+  useEffect(() => {
+    if (files.length > 0) {
+      buildTree()
+    }
+  }, [files, searchQuery, selectedTags])
 
   const loadTagsConfig = async () => {
     try {
@@ -111,6 +129,77 @@ export default function MemoryPage() {
     }
   }
 
+  const buildTree = () => {
+    const filteredFiles = files.filter(file => {
+      if (searchQuery && !file.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false
+      }
+      
+      if (selectedTags.length > 0) {
+        const tags = getFileTags(file.relativePath)
+        if (!selectedTags.some(t => tags.includes(t))) {
+          return false
+        }
+      }
+      
+      return true
+    })
+
+    const tree: TreeNode[] = []
+    const map = new Map<string, TreeNode>()
+
+    filteredFiles.forEach(file => {
+      const parts = file.relativePath.split('/')
+      let currentPath = ''
+      
+      parts.forEach((part, index) => {
+        const parentPath = currentPath
+        currentPath = currentPath ? `${currentPath}/${part}` : part
+        
+        if (!map.has(currentPath)) {
+          const isLast = index === parts.length - 1
+          const node: TreeNode = {
+            name: part,
+            path: currentPath,
+            relativePath: currentPath,
+            isDirectory: !isLast,
+            children: isLast ? undefined : [],
+            file: isLast ? file : undefined,
+            expanded: false
+          }
+          
+          map.set(currentPath, node)
+          
+          if (parentPath) {
+            const parent = map.get(parentPath)
+            if (parent && parent.children) {
+              parent.children.push(node)
+            }
+          } else {
+            tree.push(node)
+          }
+        }
+      })
+    })
+
+    setTreeData(tree)
+  }
+
+  const toggleNode = (node: TreeNode) => {
+    const updateTree = (nodes: TreeNode[]): TreeNode[] => {
+      return nodes.map(n => {
+        if (n.path === node.path) {
+          return { ...n, expanded: !n.expanded }
+        }
+        if (n.children) {
+          return { ...n, children: updateTree(n.children) }
+        }
+        return n
+      })
+    }
+    setTreeData(updateTree(treeData))
+  }
+
   const hasUnsavedChanges = fileContent !== originalContent
 
   const formatSize = (bytes: number) => {
@@ -141,6 +230,75 @@ export default function MemoryPage() {
     )
   }
 
+  const renderTreeNode = (node: TreeNode, depth: number = 0): JSX.Element => {
+    const tags = node.file ? getFileTags(node.file.relativePath) : []
+    const isSelected = selectedFile === node.relativePath
+
+    if (node.isDirectory) {
+      return (
+        <div key={node.path}>
+          <button
+            onClick={() => toggleNode(node)}
+            className="w-full flex items-center gap-1 p-1 rounded hover:bg-accent text-left"
+            style={{ paddingLeft: `${depth * 12 + 4}px` }}
+          >
+            {node.expanded ? (
+              <ChevronDown className="h-3 w-3 flex-shrink-0" />
+            ) : (
+              <ChevronRight className="h-3 w-3 flex-shrink-0" />
+            )}
+            {node.expanded ? (
+              <FolderOpen className="h-4 w-4 flex-shrink-0 text-yellow-500" />
+            ) : (
+              <Folder className="h-4 w-4 flex-shrink-0 text-yellow-500" />
+            )}
+            <span className="text-sm font-medium truncate">{node.name}</span>
+          </button>
+          {node.expanded && node.children && (
+            <div>
+              {node.children.map(child => renderTreeNode(child, depth + 1))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <button
+        key={node.path}
+        onClick={() => node.file && loadFile(node.file.relativePath)}
+        className={`w-full flex flex-col gap-0.5 p-1 rounded text-left transition-colors ${
+          isSelected ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+        }`}
+        style={{ paddingLeft: `${depth * 12 + 20}px` }}
+      >
+        <div className="flex items-center gap-1 min-w-0">
+          <FileText className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="text-sm truncate flex-1 min-w-0">{node.name}</span>
+        </div>
+        {node.file && (
+          <>
+            <div className="text-[10px] opacity-70 pl-4 truncate">
+              {formatSize(node.file.size)} • {formatDate(node.file.modified)}
+            </div>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-0.5 pl-4">
+                {tags.map(tag => (
+                  <span
+                    key={tag}
+                    className={`px-1 py-0 rounded text-[9px] border ${TAG_COLORS[tag]}`}
+                  >
+                    {tags[tag]?.label || tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </button>
+    )
+  }
+
   const filteredFiles = files.filter(file => {
     if (searchQuery && !file.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false
@@ -161,11 +319,31 @@ export default function MemoryPage() {
       {/* File List Sidebar */}
       <Card className="w-96 flex flex-col h-full overflow-hidden">
         <CardHeader className="pb-3 flex-shrink-0">
-          <CardTitle>Memory Files</CardTitle>
-          <CardDescription>
-            {filteredFiles.filter(f => !f.isDirectory).length} files
-            {selectedTags.length > 0 && ` • Filtered`}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Memory Files</CardTitle>
+              <CardDescription>
+                {filteredFiles.filter(f => !f.isDirectory).length} files
+                {selectedTags.length > 0 && ` • Filtered`}
+              </CardDescription>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                variant={viewMode === 'tree' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('tree')}
+              >
+                <FolderTree className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           
           {/* Search */}
           <div className="relative mt-3">
@@ -197,11 +375,15 @@ export default function MemoryPage() {
         </CardHeader>
         
         <div className="flex-1 overflow-y-auto px-4 pb-4">
-          <div className="space-y-1">
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : (
-              filteredFiles.map((file) => {
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          ) : viewMode === 'tree' ? (
+            <div className="space-y-0.5">
+              {treeData.map(node => renderTreeNode(node))}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filteredFiles.map((file) => {
                 const fileTags = getFileTags(file.relativePath)
                 return (
                   <button
@@ -247,9 +429,9 @@ export default function MemoryPage() {
                     )}
                   </button>
                 )
-              })
-            )}
-          </div>
+              })}
+            </div>
+          )}
         </div>
       </Card>
 
