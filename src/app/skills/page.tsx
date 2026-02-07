@@ -40,6 +40,30 @@ interface SkillDetail {
   content: string
 }
 
+// Generate consistent color for each tag
+const getTagColor = (tag: string) => {
+  const colors = [
+    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800',
+    'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800',
+    'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border-pink-200 dark:border-pink-800',
+    'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
+    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+    'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
+    'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+  ]
+  
+  // Simple hash function to get consistent color for same tag
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) {
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  
+  return colors[Math.abs(hash) % colors.length]
+}
+
 export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
@@ -157,7 +181,7 @@ export default function SkillsPage() {
             </Badge>
           )}
         </div>
-        <Button onClick={loadSkills} variant="outline" size="sm">
+        <Button onClick={loadSkills} variant="outline" size="sm" className="cursor-pointer">
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
@@ -171,22 +195,25 @@ export default function SkillsPage() {
             variant={selectedTag === 'all' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setSelectedTag('all')}
-            className="h-7"
+            className="h-7 cursor-pointer"
           >
             All ({skills.length})
           </Button>
           {allTags.map(tag => {
             const count = skills.filter(s => s.tags?.includes(tag)).length
+            const isSelected = selectedTag === tag
             return (
-              <Button
+              <button
                 key={tag}
-                variant={selectedTag === tag ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => setSelectedTag(tag)}
-                className="h-7"
+                className={`h-7 px-3 text-xs font-medium rounded-md border transition-all cursor-pointer ${
+                  isSelected 
+                    ? 'ring-2 ring-offset-2 ring-offset-background' 
+                    : 'hover:scale-105'
+                } ${getTagColor(tag)}`}
               >
                 {tag} ({count})
-              </Button>
+              </button>
             )
           })}
         </div>
@@ -233,7 +260,7 @@ export default function SkillsPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-5 px-1"
+                className="h-5 px-1 cursor-pointer"
                 asChild
               >
                 <a href={`file://${selectedSkill?.path}`} target="_blank" rel="noopener noreferrer">
@@ -253,7 +280,7 @@ export default function SkillsPage() {
               <div className="flex gap-1 border-b">
                 <button
                   onClick={() => setViewMode('view')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
                     viewMode === 'view'
                       ? 'border-primary text-primary'
                       : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -264,7 +291,7 @@ export default function SkillsPage() {
                 </button>
                 <button
                   onClick={() => setViewMode('edit')}
-                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
                     viewMode === 'edit'
                       ? 'border-primary text-primary'
                       : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -303,6 +330,7 @@ export default function SkillsPage() {
                     variant="outline"
                     size="sm"
                     onClick={closeSheet}
+                    className="cursor-pointer"
                   >
                     Cancel
                   </Button>
@@ -310,6 +338,7 @@ export default function SkillsPage() {
                     size="sm"
                     onClick={saveSkill}
                     disabled={saving || editedContent === selectedSkill?.content}
+                    className="cursor-pointer"
                   >
                     {saving ? (
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -347,16 +376,15 @@ function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (nam
           <TableHeader>
             <TableRow className="border-b">
               <TableHead className="w-[40px] h-10 py-2">Docs</TableHead>
-              <TableHead className="h-10 py-2">Name</TableHead>
+              <TableHead className="w-[200px] h-10 py-2">Name</TableHead>
               <TableHead className="h-10 py-2">Description</TableHead>
-              <TableHead className="w-[200px] h-10 py-2">Tags</TableHead>
-              <TableHead className="w-[350px] h-10 py-2">Path</TableHead>
-              <TableHead className="w-[180px] h-10 py-2 text-right">Actions</TableHead>
+              <TableHead className="w-[280px] h-10 py-2">Tags</TableHead>
+              <TableHead className="w-[120px] h-10 py-2 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {skills.map((skill) => (
-              <TableRow key={skill.name} className="h-12">
+              <TableRow key={skill.name} className="hover:bg-muted/50 transition-colors">
                 <TableCell className="py-2">
                   {skill.hasSkillMd ? (
                     <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10">
@@ -372,7 +400,7 @@ function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (nam
                   <div className="font-medium">{skill.name}</div>
                 </TableCell>
                 <TableCell className="py-2">
-                  <div className="text-sm text-muted-foreground truncate max-w-md">
+                  <div className="text-sm text-muted-foreground line-clamp-3">
                     {skill.description || '-'}
                   </div>
                 </TableCell>
@@ -380,18 +408,16 @@ function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (nam
                   <div className="flex gap-1 flex-wrap">
                     {skill.tags && skill.tags.length > 0 ? (
                       skill.tags.map(tag => (
-                        <Badge key={tag} variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                        <span 
+                          key={tag} 
+                          className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${getTagColor(tag)}`}
+                        >
                           {tag}
-                        </Badge>
+                        </span>
                       ))
                     ) : (
                       <span className="text-xs text-muted-foreground">-</span>
                     )}
-                  </div>
-                </TableCell>
-                <TableCell className="py-2">
-                  <div className="text-xs font-mono text-muted-foreground truncate">
-                    {skill.path}
                   </div>
                 </TableCell>
                 <TableCell className="text-right py-2">
@@ -399,19 +425,18 @@ function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (nam
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2"
+                      className="h-7 px-2 cursor-pointer"
                       asChild
                     >
                       <a href={`file://${skill.path}`} target="_blank" rel="noopener noreferrer">
-                        <FolderOpen className="h-3 w-3 mr-1" />
-                        Folder
+                        <FolderOpen className="h-3 w-3" />
                       </a>
                     </Button>
                     {skill.hasSkillMd && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2"
+                        className="h-7 px-2 cursor-pointer"
                         onClick={() => onViewDocs(skill.name)}
                       >
                         <FileText className="h-3 w-3 mr-1" />
