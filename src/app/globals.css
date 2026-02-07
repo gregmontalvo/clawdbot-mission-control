@@ -125,6 +125,73 @@
   }
 }
 
+/* Prose Typography Spacing Overrides */
+.prose {
+  /* Increase all vertical spacing */
+  --tw-prose-body: 1rem;
+  --tw-prose-headings: 1rem;
+  --tw-prose-lead: 1rem;
+  --tw-prose-links: 1rem;
+  --tw-prose-bold: 1rem;
+  --tw-prose-counters: 1rem;
+  --tw-prose-bullets: 1rem;
+  --tw-prose-hr: 1rem;
+  --tw-prose-quotes: 1rem;
+  --tw-prose-quote-borders: 1rem;
+  --tw-prose-captions: 1rem;
+  --tw-prose-code: 1rem;
+  --tw-prose-pre-code: 1rem;
+  --tw-prose-pre-bg: 1rem;
+  --tw-prose-th-borders: 1rem;
+  --tw-prose-td-borders: 1rem;
+  
+  /* Custom spacing for each element */
+  & h1 {
+    margin-top: 2.5em !important;
+    margin-bottom: 1.5em !important;
+  }
+  
+  & h2 {
+    margin-top: 2em !important;
+    margin-bottom: 1.25em !important;
+  }
+  
+  & h3 {
+    margin-top: 1.75em !important;
+    margin-bottom: 1em !important;
+  }
+  
+  & p {
+    margin-top: 1.5em !important;
+    margin-bottom: 1.5em !important;
+  }
+  
+  & ul, & ol {
+    margin-top: 1.5em !important;
+    margin-bottom: 1.5em !important;
+  }
+  
+  & li {
+    margin-top: 0.75em !important;
+    margin-bottom: 0.75em !important;
+  }
+  
+  & pre {
+    margin-top: 1.5em !important;
+    margin-bottom: 1.5em !important;
+  }
+  
+  & blockquote {
+    margin-top: 1.5em !important;
+    margin-bottom: 1.5em !important;
+  }
+  
+  & hr {
+    margin-top: 2em !important;
+    margin-bottom: 2em !important;
+  }
+}
+
 /* Markdown Preview Enhancements */
 .markdown-preview {
   /* Better spacing between elements */
