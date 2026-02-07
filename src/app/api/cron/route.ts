@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const gatewayUrl =
-      process.env.CLAWDBOT_GATEWAY_URL || "http://localhost:3210";
-    const token = process.env.CLAWDBOT_TOKEN || "";
+      process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:3210";
+    const token = process.env.GATEWAY_AUTH_TOKEN || "";
 
     const response = await fetch(`${gatewayUrl}/api/cron/list`, {
       headers: {
