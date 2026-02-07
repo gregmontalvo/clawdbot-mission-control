@@ -1,11 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Users, Bot, Zap, RefreshCw, MessageSquare, Clock } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Users, Bot, MessageSquare, RefreshCw, Clock, Send } from "lucide-react"
 
 interface Session {
   sessionKey: string
@@ -17,20 +25,10 @@ interface Session {
   messageCount?: number
 }
 
-interface AgentConfig {
-  model: string
-  workspace: string
-  maxConcurrent: number
-  subAgentsMax: number
-  memorySearch: boolean
-  sessionMemory: boolean
-  compactionMode: string
-}
-
 export default function AgentsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
-  const [config, setConfig] = useState<AgentConfig | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'main' | 'subagents'>('main')
 
   useEffect(() => {
     loadData()
@@ -42,7 +40,6 @@ export default function AgentsPage() {
       const response = await fetch('/api/agents')
       const data = await response.json()
       setSessions(data.sessions || [])
-      setConfig(data.config || null)
     } catch (error) {
       console.error('Failed to load agents data:', error)
     } finally {
@@ -53,7 +50,7 @@ export default function AgentsPage() {
   const getSessionLabel = (session: Session) => {
     if (session.label) return session.label
     if (session.channel) return `${session.channel} session`
-    return session.sessionKey.slice(0, 8)
+    return session.sessionKey.slice(0, 12)
   }
 
   const getTimeSince = (timestamp?: string) => {
@@ -73,267 +70,152 @@ export default function AgentsPage() {
   const mainSessions = sessions.filter(s => s.kind !== 'spawn')
   const subAgentSessions = sessions.filter(s => s.kind === 'spawn')
 
-  return (
-    <div className="flex-1 space-y-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Agents</h1>
-          <p className="text-muted-foreground">
-            Active agents and sessions
-          </p>
+  if (loading) {
+    return (
+      <div className="flex-1 p-6">
+        <div className="flex items-center justify-center h-64">
+          <RefreshCw className="h-8 w-8 animate-spin opacity-50" />
         </div>
-        <Button onClick={loadData} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex-1 p-6">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Agents</h1>
+          <Badge variant="outline" className="gap-2">
+            <Users className="h-3 w-3" />
+            {sessions.length} Sessions
+          </Badge>
+          <Badge variant="outline" className="gap-2">
+            <MessageSquare className="h-3 w-3 text-blue-500" />
+            {mainSessions.length} Main
+          </Badge>
+          <Badge variant="outline" className="gap-2">
+            <Bot className="h-3 w-3 text-purple-500" />
+            {subAgentSessions.length} Sub-agents
+          </Badge>
+        </div>
+        <Button onClick={loadData} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sessions.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Active conversations
-            </p>
-          </CardContent>
-        </Card>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mb-4">
+        <TabsList>
+          <TabsTrigger value="main">
+            <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+            Main Sessions ({mainSessions.length})
+          </TabsTrigger>
+          <TabsTrigger value="subagents">
+            <Bot className="h-3.5 w-3.5 mr-1.5" />
+            Sub-agents ({subAgentSessions.length})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Main Sessions</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{mainSessions.length}</div>
-            <p className="text-xs text-muted-foreground">
-              User channels
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sub-Agents</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{subAgentSessions.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Spawned workers
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {sessions.reduce((sum, s) => sum + (s.messageCount || 0), 0)}
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          {sessions.length === 0 ? (
+            <div className="py-12 text-center">
+              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground">No active sessions</p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Across all sessions
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Agent Config */}
-      {config && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
-                <CardTitle>Main Agent (Coach)</CardTitle>
-              </div>
-              <Badge variant="outline" className="gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                Active
-              </Badge>
-            </div>
-            <CardDescription>Primary Clawdbot agent configuration</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid grid-cols-2 gap-4">
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Model</dt>
-                <dd className="text-lg font-mono">{config.model}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Workspace</dt>
-                <dd className="text-sm font-mono truncate">{config.workspace}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Max Concurrent</dt>
-                <dd className="text-lg">{config.maxConcurrent}</dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Sub-agents Max</dt>
-                <dd className="text-lg">{config.subAgentsMax}</dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Sessions Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Main Sessions */}
-        {mainSessions.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                <CardTitle>Main Sessions</CardTitle>
-              </div>
-              <CardDescription>Active user channels</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-3">
-                  {mainSessions.map((session) => (
-                    <div
-                      key={session.sessionKey}
-                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="flex-shrink-0 mt-1">
-                        <div className="h-3 w-3 rounded-full bg-green-500" />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b">
+                  <TableHead className="w-[40px] h-10 py-2">Status</TableHead>
+                  <TableHead className="w-[200px] h-10 py-2">Label</TableHead>
+                  <TableHead className="w-[100px] h-10 py-2">Kind</TableHead>
+                  <TableHead className="w-[100px] h-10 py-2">Channel</TableHead>
+                  <TableHead className="w-[80px] h-10 py-2">Messages</TableHead>
+                  <TableHead className="w-[120px] h-10 py-2">Last Active</TableHead>
+                  <TableHead className="w-[120px] h-10 py-2">Created</TableHead>
+                  <TableHead className="h-10 py-2">Session Key</TableHead>
+                  <TableHead className="w-[100px] h-10 py-2 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(activeTab === 'main' ? mainSessions : subAgentSessions).map((session) => (
+                  <TableRow key={session.sessionKey} className="h-12">
+                    <TableCell className="py-2">
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="font-medium truncate">
+                        {getSessionLabel(session)}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium">{getSessionLabel(session)}</p>
-                          {session.channel && (
-                            <Badge variant="outline" className="text-xs">
-                              {session.channel}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{session.messageCount || 0} messages</span>
-                          <span>Last: {getTimeSince(session.lastMessageAt)}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1 font-mono truncate">
-                          {session.sessionKey}
-                        </p>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Badge variant={session.kind === 'spawn' ? 'secondary' : 'default'} className="text-xs">
+                        {session.kind || 'main'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {session.channel ? (
+                        <Badge variant="outline" className="text-xs">
+                          {session.channel}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="text-sm font-mono">
+                        {session.messageCount || 0}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Sub-Agent Sessions */}
-        {subAgentSessions.length > 0 && (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
-                <CardTitle>Sub-Agents</CardTitle>
-              </div>
-              <CardDescription>Spawned worker sessions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-3">
-                  {subAgentSessions.map((session) => (
-                    <div
-                      key={session.sessionKey}
-                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="flex-shrink-0 mt-1">
-                        <Bot className="h-4 w-4 text-blue-500" />
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="text-sm text-muted-foreground">
+                        {getTimeSince(session.lastMessageAt)}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium">{getSessionLabel(session)}</p>
-                          <Badge variant="secondary" className="text-xs">
-                            Spawn
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{session.messageCount || 0} messages</span>
-                          <span>Created: {getTimeSince(session.createdAt)}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1 font-mono truncate">
-                          {session.sessionKey}
-                        </p>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="text-sm text-muted-foreground">
+                        {getTimeSince(session.createdAt)}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Capabilities */}
-      {config && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              <CardTitle>Capabilities</CardTitle>
-            </div>
-            <CardDescription>Agent features and settings</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Memory Search</span>
-                <Badge variant={config.memorySearch ? "default" : "secondary"}>
-                  {config.memorySearch ? "Enabled" : "Disabled"}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Session Memory (Experimental)</span>
-                <Badge variant={config.sessionMemory ? "default" : "secondary"}>
-                  {config.sessionMemory ? "Enabled" : "Disabled"}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Compaction Mode</span>
-                <Badge variant="outline">{config.compactionMode}</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Max Concurrent Sessions</span>
-                <Badge variant="outline">{config.maxConcurrent}</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Empty State */}
-      {sessions.length === 0 && !loading && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No active sessions</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RefreshCw className="h-12 w-12 mx-auto mb-4 opacity-50 animate-spin" />
-            <p className="text-muted-foreground">Loading agent data...</p>
-          </CardContent>
-        </Card>
-      )}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="text-xs font-mono text-muted-foreground truncate max-w-xs">
+                        {session.sessionKey}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right py-2">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2"
+                          title="Send message"
+                        >
+                          <Send className="h-3 w-3 mr-1" />
+                          Message
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2"
+                          title="View history"
+                        >
+                          <Clock className="h-3 w-3 mr-1" />
+                          History
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
