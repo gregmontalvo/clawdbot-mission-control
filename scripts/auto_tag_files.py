@@ -12,10 +12,16 @@ def auto_tag(relative_path):
     file_name = os.path.basename(relative_path)
     dir_name = os.path.dirname(relative_path)
     
-    # Core files
-    core_files = ['AGENTS.md', 'SOUL.md', 'USER.md', 'IDENTITY.md', 'BOOTSTRAP.md', 'SECURITY.md', 'TOOLS.md']
+    # Core files at root
+    core_files = ['AGENTS.md', 'SOUL.md', 'USER.md', 'IDENTITY.md', 'BOOTSTRAP.md', 'SECURITY.md', 'TOOLS.md', 'FILING.md']
     if file_name in core_files and dir_name == '':
         tags.append('core')
+    
+    # Important operational files
+    if file_name in ['EMERGENCY_RESTART.md'] and dir_name == '':
+        tags.append('config')
+    if file_name == 'MAC-MINI-STRUCTURE.md' and dir_name in ['', 'docs']:
+        tags.append('config')
     
     # Config files
     if file_name == 'HEARTBEAT.md':
@@ -23,30 +29,41 @@ def auto_tag(relative_path):
     if file_name == 'README.md' and dir_name == '':
         tags.extend(['core', 'config'])
     
-    # Memory files
+    # MEMORY.md at root
+    if file_name == 'MEMORY.md' and dir_name == '':
+        tags.append('memory')
+        return list(set(tags))
+    
+    # Memory directory
     if relative_path.startswith('memory/'):
         tags.append('memory')
         
-        # Long-term memory
-        if file_name == 'MEMORY.md':
-            pass  # Only memory tag
-        # Projects
-        elif 'project' in file_name.lower() or file_name == 'projects-open.md':
+        if 'project' in file_name.lower() or file_name == 'projects-open.md':
             tags.append('project')
-        # Research
         elif any(word in file_name.lower() for word in ['research', 'report', 'analysis', 'learning', 'competitor', 'investigation']):
             tags.append('research')
-        # Logs
         elif any(word in file_name.lower() for word in ['log', 'history']):
             tags.append('project')
     
-    # Skills
-    if '/skills/' in relative_path and file_name == 'SKILL.md':
+    # Skills directory (all files)
+    if relative_path.startswith('skills/') or '/skills/' in relative_path:
         tags.append('skill')
     
-    # Clients
-    if '/samples/' in relative_path and file_name in ['CLIENT.md', 'BRIEFING.md']:
-        tags.append('client')
+    # Projects directory
+    if relative_path.startswith('projects/'):
+        if not tags:
+            tags.append('project')
+    
+    # Research directory
+    if relative_path.startswith('research/'):
+        tags.append('research')
+    
+    # Clients/samples
+    if '/samples/' in relative_path or '/clients/' in relative_path:
+        if file_name in ['CLIENT.md', 'BRIEFING.md']:
+            tags.append('client')
+        elif not tags:
+            tags.append('client')
     
     # Templates
     if 'template' in file_name.lower():
@@ -56,32 +73,47 @@ def auto_tag(relative_path):
     if any(word in relative_path.lower() for word in ['/archive/', '/briefings/']):
         tags.append('archive')
     
-    # Config/docs in deep paths
-    if relative_path.count('/') > 2 and not tags:
-        if '/docs/' in relative_path or file_name.startswith('README'):
-            tags.append('config')
+    # Blog drafts
+    if relative_path.startswith('blog-drafts/'):
+        tags.append('archive')
     
-    # Research (anywhere)
-    if not tags and any(word in file_name.lower() for word in ['competitor', 'research', 'analysis', 'spike']):
+    # Reports directory
+    if relative_path.startswith('reports/'):
         tags.append('research')
     
-    # Default tagging by directory depth and patterns
+    # Output directory
+    if relative_path.startswith('output/'):
+        tags.append('archive')
+    
+    # Default patterns (only if no tags yet)
     if not tags:
-        # Deep skill references
-        if '/skills/' in relative_path:
-            tags.append('skill')
-        # Client folders
-        elif any(word in relative_path.lower() for word in ['/clients/', '/samples/']):
-            tags.append('client')
         # Docs and setup files
-        elif any(word in file_name.upper() for word in ['README', 'SETUP', 'GUIDE', 'WORKFLOW']):
+        if any(word in file_name.upper() for word in ['README', 'SETUP', 'GUIDE', 'WORKFLOW', 'ESTRUCTURA', 'FICHA']):
             tags.append('config')
         # Strategy, plans, briefings
-        elif any(word in file_name.lower() for word in ['plan', 'strategy', 'brief', 'coach', 'metodolog']):
+        elif any(word in file_name.lower() for word in ['plan', 'strategy', 'brief', 'coach', 'metodolog', 'propuesta']):
             tags.append('project')
         # Reports and stats
-        elif any(word in file_name.lower() for word in ['report', 'stats', 'metrics', 'analytics']):
+        elif any(word in file_name.lower() for word in ['report', 'stats', 'metrics', 'analytics', 'reporte']):
             tags.append('research')
+        # Agendas and calendars
+        elif any(word in file_name.lower() for word in ['agenda', 'calendar', 'evento']):
+            tags.append('project')
+        # Tips, guides, references
+        elif any(word in file_name.lower() for word in ['tips', 'pro-tip', 'reference', 'examples', 'ideas', 'learnings']):
+            tags.append('template')
+        # Technical files
+        elif any(word in file_name.lower() for word in ['technical', 'system', 'debug', 'config', 'estructura']):
+            tags.append('config')
+        # Marketing and content
+        elif any(word in file_name.lower() for word in ['marketing', 'content', 'social', 'post', 'copy', 'campaign']):
+            tags.append('project')
+        # Date-based files not in memory/ (agendas, reports)
+        elif file_name[0:4].isdigit() and '-' in file_name:
+            if 'agenda' in file_name.lower() or 'report' in file_name.lower():
+                tags.append('research')
+            else:
+                tags.append('archive')
     
     return list(set(tags)) if tags else None
 
