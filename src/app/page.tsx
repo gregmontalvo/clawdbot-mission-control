@@ -1,4 +1,4 @@
-import { gateway } from "@/lib/gateway"
+import { listCrons, getConfig } from "@/lib/clawdbot"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Activity, Clock, Zap, CheckCircle2, AlertCircle, XCircle } from "lucide-react"
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function Dashboard() {
-  const crons = await gateway.listCrons()
-  const config = await gateway.getConfig()
+  const crons = await listCrons()
+  const config = await getConfig()
 
   // Calculate stats
   const enabledCrons = crons.filter(c => c.enabled)

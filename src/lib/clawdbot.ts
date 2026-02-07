@@ -1,7 +1,10 @@
 /**
- * Clawdbot Gateway API Client
- * Uses Next.js API routes that execute clawdbot CLI commands
+ * Direct Clawdbot CLI interface
  */
+import { exec } from 'child_process'
+import { promisify } from 'util'
+
+const execAsync = promisify(exec)
 
 export interface CronJob {
   id: string
@@ -52,29 +55,30 @@ export interface GatewayConfig {
   }
 }
 
-class GatewayClient {
-  async listCrons(): Promise<CronJob[]> {
-    const response = await fetch('/api/crons', { cache: 'no-store' })
-    if (!response.ok) {
-      throw new Error('Failed to fetch crons')
-    }
-    const data = await response.json()
+export async function listCrons(): Promise<CronJob[]> {
+  try {
+    const { stdout } = await execAsync(
+      'clawdbot cron list --json',
+      { timeout: 10000 }
+    )
+    const data = JSON.parse(stdout)
     return data.jobs || []
-  }
-
-  async getConfig(): Promise<GatewayConfig> {
-    const response = await fetch('/api/config', { cache: 'no-store' })
-    if (!response.ok) {
-      throw new Error('Failed to fetch config')
-    }
-    const data = await response.json()
-    return data.parsed || {}
-  }
-
-  async listSkills(): Promise<string[]> {
-    // TODO: Implement via API route
+  } catch (error) {
+    console.error('Failed to fetch crons:', error)
     return []
   }
 }
 
-export const gateway = new GatewayClient()
+export async function getConfig(): Promise<GatewayConfig> {
+  try {
+    const { stdout } = await execAsync(
+      'clawdbot gateway config --json',
+      { timeout: 10000 }
+    )
+    const data = JSON.parse(stdout)
+    return data.parsed || {}
+  } catch (error) {
+    console.error('Failed to fetch config:', error)
+    return {}
+  }
+}

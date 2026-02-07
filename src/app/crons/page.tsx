@@ -1,4 +1,4 @@
-import { gateway } from "@/lib/gateway"
+import { listCrons } from "@/lib/clawdbot"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -39,7 +39,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function CronsPage() {
-  const crons = await gateway.listCrons()
+  const crons = await listCrons()
   const enabledCrons = crons.filter(c => c.enabled)
 
   return (
