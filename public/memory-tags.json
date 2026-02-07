@@ -13,12 +13,12 @@
     "client": {
       "label": "Client",
       "color": "blue",
-      "description": "Información de clientes"
+      "description": "Informaci\u00f3n de clientes"
     },
     "skill": {
       "label": "Skill",
       "color": "green",
-      "description": "Documentación de skills"
+      "description": "Documentaci\u00f3n de skills"
     },
     "project": {
       "label": "Project",
@@ -28,7 +28,7 @@
     "research": {
       "label": "Research",
       "color": "cyan",
-      "description": "Investigación y análisis"
+      "description": "Investigaci\u00f3n y an\u00e1lisis"
     },
     "template": {
       "label": "Template",
@@ -38,60 +38,465 @@
     "config": {
       "label": "Config",
       "color": "yellow",
-      "description": "Configuración y setup"
+      "description": "Configuraci\u00f3n y setup"
     },
     "archive": {
       "label": "Archive",
       "color": "slate",
-      "description": "Archivado / referencia histórica"
+      "description": "Archivado / referencia hist\u00f3rica"
     }
   },
   "fileTags": {
-    "AGENTS.md": ["core"],
-    "SOUL.md": ["core"],
-    "USER.md": ["core"],
-    "IDENTITY.md": ["core"],
-    "HEARTBEAT.md": ["core", "config"],
-    "BOOTSTRAP.md": ["core"],
-    "SECURITY.md": ["core"],
-    "TOOLS.md": ["core"],
-    "MEMORY.md": ["memory"],
-    "memory/2026-02-07.md": ["memory"],
-    "memory/2026-02-06.md": ["memory"],
-    "memory/2026-02-05.md": ["memory"],
-    "memory/2026-02-04.md": ["memory"],
-    "memory/2026-02-03.md": ["memory"],
-    "memory/2026-02-02.md": ["memory"],
-    "memory/2026-02-01.md": ["memory"],
-    "memory/2026-01-31.md": ["memory"],
-    "memory/2026-01-30.md": ["memory"],
-    "memory/2026-01-29.md": ["memory"],
-    "memory/2026-01-28.md": ["memory"],
-    "memory/2026-01-27.md": ["memory"],
-    "memory/projects-open.md": ["memory", "project"],
-    "memory/twitter-log.md": ["memory", "project"],
-    "memory/outreach-log.md": ["memory", "project"],
-    "memory/marketing-learnings.md": ["memory", "research"],
-    "memory/twitter-learnings.md": ["memory", "research"],
-    "skills/badge-creator/SKILL.md": ["skill"],
-    "skills/badge-icon-library/SKILL.md": ["skill"],
-    "skills/badgie-crm/SKILL.md": ["skill"],
-    "skills/badgie-database/SKILL.md": ["skill"],
-    "skills/client-content-creator/SKILL.md": ["skill"],
-    "skills/google-workspace/SKILL.md": ["skill"],
-    "skills/marketing-director/SKILL.md": ["skill"],
-    "skills/marketing-outbound/SKILL.md": ["skill"],
-    "skills/twitter/SKILL.md": ["skill"],
-    "skills/twitter-ceo/SKILL.md": ["skill"],
-    "skills/sports-directory/SKILL.md": ["skill"],
-    "samples/elianers/CLIENT.md": ["client"],
-    "samples/freddy-santos/CLIENT.md": ["client"],
-    "samples/telemark/CLIENT.md": ["client"],
-    "memory/2026-01-29-usa-competitors-report.md": ["research"],
-    "memory/2026-02-04-badgie-intelligence-portal.md": ["project"],
-    "memory/badgie-deep-dive.md": ["research"],
-    "memory/badgie-wiki-reference.md": ["research"],
-    "TEMPLATE-instagram-report.md": ["template"],
-    "README.md": ["config"]
+    "IDENTITY.md": [
+      "core"
+    ],
+    "HEARTBEAT.md": [
+      "config",
+      "core"
+    ],
+    "README.md": [
+      "config",
+      "core"
+    ],
+    "BOOTSTRAP.md": [
+      "core"
+    ],
+    "USER.md": [
+      "core"
+    ],
+    "SOUL.md": [
+      "core"
+    ],
+    "AGENTS.md": [
+      "core"
+    ],
+    "SECURITY.md": [
+      "core"
+    ],
+    "TOOLS.md": [
+      "core"
+    ],
+    "clients/freddy-santos/BRIEFING.md": [
+      "project"
+    ],
+    "clients/freddy-santos/batch-2/README.md": [
+      "config"
+    ],
+    "clients/freddy-santos/reports/estrategia-academy-brief.md": [
+      "project"
+    ],
+    "clients/freddy-santos/reports/TEMPLATE-instagram-report.md": [
+      "template"
+    ],
+    "memory/operating-model.md": [
+      "memory"
+    ],
+    "memory/twitter-log.md": [
+      "memory",
+      "project"
+    ],
+    "memory/2026-02-02-agenda.md": [
+      "memory"
+    ],
+    "memory/2026-01-27.md": [
+      "memory"
+    ],
+    "memory/2026-02-04-agenda.md": [
+      "memory"
+    ],
+    "memory/marketing-learnings.md": [
+      "memory",
+      "research"
+    ],
+    "memory/twitter-thread-pending.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-blog-plan.md": [
+      "memory",
+      "project"
+    ],
+    "memory/2026-02-06.md": [
+      "memory"
+    ],
+    "memory/2026-01-28.md": [
+      "memory"
+    ],
+    "memory/projects-open.md": [
+      "memory",
+      "project"
+    ],
+    "memory/security-incidents.md": [
+      "memory"
+    ],
+    "memory/2026-02-02.md": [
+      "memory"
+    ],
+    "memory/2026-02-03-agenda.md": [
+      "memory"
+    ],
+    "memory/2026-02-05-reflexion.md": [
+      "memory"
+    ],
+    "memory/2026-01-30-clawdbot-usecases.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-crm-tasks.md": [
+      "memory"
+    ],
+    "memory/2026-02-03.md": [
+      "memory"
+    ],
+    "memory/info-badges-workflow-imagenes.md": [
+      "memory"
+    ],
+    "memory/2026-02-05-agenda.md": [
+      "memory"
+    ],
+    "memory/2026-02-07.md": [
+      "memory"
+    ],
+    "memory/2026-01-29.md": [
+      "memory"
+    ],
+    "memory/2026-01-30-crm-review.md": [
+      "memory"
+    ],
+    "memory/outreach-log.md": [
+      "memory",
+      "project"
+    ],
+    "memory/freddy-santos-logo-IMPORTANTE.md": [
+      "memory",
+      "project"
+    ],
+    "memory/2025-01-27.md": [
+      "memory"
+    ],
+    "memory/2026-02-04.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-agenda.md": [
+      "memory"
+    ],
+    "memory/2026-02-05.md": [
+      "memory"
+    ],
+    "memory/crm-enrichment-2026-01-28.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-usa-competitors-report.md": [
+      "memory",
+      "research"
+    ],
+    "memory/2026-02-01.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-reunion-tenis-caudete.md": [
+      "memory"
+    ],
+    "memory/badgie-deep-dive.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-web-analysis.md": [
+      "memory",
+      "research"
+    ],
+    "memory/2026-01-30.md": [
+      "memory"
+    ],
+    "memory/2026-02-06-stats-semana.md": [
+      "memory"
+    ],
+    "memory/seo-actions-log.md": [
+      "memory",
+      "project"
+    ],
+    "memory/badgie-wiki-reference.md": [
+      "memory"
+    ],
+    "memory/content-strategy.md": [
+      "memory"
+    ],
+    "memory/2026-01-29-crm-research.md": [
+      "memory",
+      "research"
+    ],
+    "memory/2026-01-31.md": [
+      "memory"
+    ],
+    "memory/twitter-learnings.md": [
+      "memory",
+      "research"
+    ],
+    "memory/2026-01-29-pitch-badgie.md": [
+      "memory"
+    ],
+    "memory/clients/README.md": [
+      "memory"
+    ],
+    "memory/ideas/2026-02-04-badgie-intelligence-portal.md": [
+      "memory"
+    ],
+    "archive/briefings/club-laukariz-2026-01-28.md": [
+      "archive"
+    ],
+    "projects/badgie_crm/SETUP.md": [
+      "config"
+    ],
+    "projects/badgie_crm/STORAGE_SETUP.md": [
+      "config"
+    ],
+    "projects/badgie_crm/README.md": [
+      "config"
+    ],
+    "projects/badgie_crm/WEBHOOK_SETUP.md": [
+      "config"
+    ],
+    "projects/badgie_crm/USERS_SETUP.md": [
+      "config"
+    ],
+    "projects/creators-badgie/README.md": [
+      "config"
+    ],
+    "projects/badgie/WIKI_SETUP.md": [
+      "config"
+    ],
+    "projects/badgie/app/[locale]/(main-without-header-footer)/escuelaespanolaesqui/README-CONFIG.md": [
+      "config"
+    ],
+    "projects/badgie/app/[locale]/(protected)/dashboard/statistics/README-tag-analytics.md": [
+      "config"
+    ],
+    "projects/badgie/app/[locale]/(protected)/dashboard/flash-badges/experimental-v2/README.md": [
+      "config"
+    ],
+    "projects/badgie/app/[locale]/(protected)/dashboard/finance/sepa/README.md": [
+      "config"
+    ],
+    "projects/badgie/app/api/mobile/communications/README.md": [
+      "config"
+    ],
+    "projects/badgie/prototype/comprehensive-analysis.md": [
+      "research"
+    ],
+    "projects/badgie/docs/DIRECTORIO-SEO.md": [
+      "config"
+    ],
+    "projects/badgie/docs/directory-import-guide.md": [
+      "config"
+    ],
+    "projects/badgie/docs/SPORTS-DIRECTORY.md": [
+      "config"
+    ],
+    "projects/badgie/docs/LEAD-AUTO-WHATSAPP-SETUP.md": [
+      "config"
+    ],
+    "projects/badgie/docs/SANITY_MCP_SETUP.md": [
+      "config"
+    ],
+    "projects/badgie/docs/NOTIFICATION-SYSTEM.md": [
+      "config"
+    ],
+    "projects/badgie/docs/WHATSAPP-MEDIA-SHARING-GUIDE.md": [
+      "config"
+    ],
+    "projects/badgie/docs/WHATSAPP-LEAD-TEMPLATE.md": [
+      "template"
+    ],
+    "output/2026-02/freddy-santos-proyecto-feb/PLAN.md": [
+      "project"
+    ],
+    "skills/badge-creator/references/senior-coach-golf.md": [
+      "project"
+    ],
+    "skills/pickleball-coach/references/competitors.md": [
+      "research"
+    ],
+    "skills/marketing-outbound/references/templates.md": [
+      "template"
+    ],
+    "skills/twitter-ceo/references/competitors.md": [
+      "research"
+    ],
+    "skills/master-coach/references/image-guidelines.md": [
+      "config"
+    ],
+    "skills/master-coach/sports/golf/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/padel/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/karate/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/crossfit/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/snowboard/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/swimming/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/ski/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/tennis/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/pickleball/COACH.md": [
+      "project"
+    ],
+    "skills/master-coach/sports/judo/COACH.md": [
+      "project"
+    ],
+    "skills/client-content-creator/samples/pickletrack/CLIENT.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/pickletrack/posts/post-01-copy.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/freddysantos/CLIENT.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/freddy-santos/CLIENT.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/telemark/CLIENT.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/telemark/posts/post-3-protip-viraje.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/telemark/posts/post-2-promo-clases.md": [
+      "client"
+    ],
+    "skills/client-content-creator/samples/telemark/posts/post-1-protip-postura.md": [
+      "client"
+    ],
+    "skills/client-content-creator/templates/CLIENT_TEMPLATE.md": [
+      "template"
+    ],
+    "skills/client-content-creator/templates/copy-templates.md": [
+      "template"
+    ],
+    "skills/badgie-analytics/insights/2026-02-01-first-analysis.md": [
+      "research"
+    ],
+    "skills/boarding-clients/references/email-templates.md": [
+      "template"
+    ],
+    "skills/boarding-clients/references/whatsapp-templates.md": [
+      "template"
+    ],
+    "skills/boarding-clients/references/client-research.md": [
+      "research"
+    ],
+    "skills/boarding-clients/templates/boarding-plan-template.md": [
+      "template"
+    ],
+    "skills/clients-marketing/WORKFLOW.md": [
+      "config"
+    ],
+    "skills/clients-marketing/clients/freddy-santos/BRIEFING.md": [
+      "client"
+    ],
+    "skills/clients-marketing/clients/freddy-santos/CLIENT.md": [
+      "client"
+    ],
+    "skills/clients-marketing/clients/freddy-santos/content-new/campus-pascua-batch-1.md": [
+      "client"
+    ],
+    "skills/sports-directory/scripts/README.md": [
+      "config"
+    ],
+    "skills/youtube-badgie/WORKFLOW.md": [
+      "config"
+    ],
+    "skills/youtube-badgie/clients/kime/CLIENT.md": [
+      "client"
+    ],
+    "skills/youtube-badgie/clients/badgie/CLIENT.md": [
+      "client"
+    ],
+    "skills/youtube-badgie/badgie-remotion/README.md": [
+      "config"
+    ],
+    "skills/youtube-badgie/badgie-remotion/docs/TIKTOK-CAPTIONS.md": [
+      "config"
+    ],
+    "skills/youtube-badgie/badgie-remotion/docs/TESTIMONIAL-WORKFLOW.md": [
+      "config"
+    ],
+    "skills/google-workspace/ANALYTICS.md": [
+      "research"
+    ],
+    "skills/finanzas-badgie/PLAN-OPTIMIZACION.md": [
+      "project"
+    ],
+    "skills/growth-hacks/references/metrics.md": [
+      "research"
+    ],
+    "skills/growth-hacks/references/email-templates.md": [
+      "template"
+    ],
+    "skills/marketing-director/references/weekly-planner.md": [
+      "project"
+    ],
+    "skills/enisa-financiacion/references/business-plan-guide.md": [
+      "config"
+    ],
+    "skills/enisa-financiacion/references/business-plan-badgie-2026.md": [
+      "project"
+    ],
+    "skills/nano-banana-pro/references/carousel-templates.md": [
+      "template"
+    ],
+    "skills/meta-ads/archive/campaigns/campaign-history.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/INDEX.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/Test - USA Features Campaign/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/Money Campaign Jan26 _ Retargeting/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/Money Campaign Jan26/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/US features campaign/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/Tailor-M Pro coaching tips Campaign/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/USA Features Campaign/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/Money Campaign Jan26 - Increase sales/README.md": [
+      "archive"
+    ],
+    "skills/meta-ads/archive/creatives/2026-02/Test - Money Campaign Jan26/README.md": [
+      "archive"
+    ],
+    "reports/spike-investigation-final-2026-02-04.md": [
+      "research"
+    ],
+    "reports/search-console-analysis-2026-02-06.md": [
+      "research"
+    ],
+    "reports/2026-02-03-overnight-report.md": [
+      "research"
+    ],
+    "reports/2026-02-04-badgie-intelligence-portal-brief.md": [
+      "project"
+    ],
+    "reports/2026-02-02 Meta Ads Report - PENDIENTE.md": [
+      "research"
+    ]
   }
 }

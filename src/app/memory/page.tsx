@@ -222,27 +222,27 @@ export default function MemoryPage() {
                           : 'hover:bg-accent'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         {file.isDirectory ? (
                           <Folder className="h-4 w-4 flex-shrink-0" />
                         ) : (
                           <FileText className="h-4 w-4 flex-shrink-0" />
                         )}
-                        <p className="text-sm font-medium truncate flex-1">{file.name}</p>
+                        <p className="text-sm font-medium truncate flex-1 min-w-0">{file.name}</p>
                       </div>
                       
                       {!file.isDirectory && (
                         <>
-                          <p className="text-xs opacity-70 pl-6">
+                          <p className="text-xs opacity-70 pl-6 truncate">
                             {formatSize(file.size)} • {formatDate(file.modified)}
                           </p>
                           
                           {fileTags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pl-6">
+                            <div className="flex flex-wrap gap-1 pl-6 min-w-0">
                               {fileTags.map(tag => (
                                 <span
                                   key={tag}
-                                  className={`px-1.5 py-0.5 rounded text-[10px] border ${TAG_COLORS[tag]}`}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] border flex-shrink-0 ${TAG_COLORS[tag]}`}
                                 >
                                   {tags[tag]?.label || tag}
                                 </span>
