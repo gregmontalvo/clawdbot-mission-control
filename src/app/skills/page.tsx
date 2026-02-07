@@ -21,7 +21,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
-import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle, RefreshCw, Save, ExternalLink } from "lucide-react"
+import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle, RefreshCw, Save, ExternalLink, Eye, Code } from "lucide-react"
+import ReactMarkdown from 'react-markdown'
 
 interface Skill {
   name: string
@@ -43,6 +44,7 @@ export default function SkillsPage() {
   const [editedContent, setEditedContent] = useState('')
   const [saving, setSaving] = useState(false)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [viewMode, setViewMode] = useState<'view' | 'edit'>('view')
 
   useEffect(() => {
     loadSkills()
@@ -63,6 +65,7 @@ export default function SkillsPage() {
 
   const loadSkillDetail = async (skillName: string) => {
     setLoadingDetail(true)
+    setViewMode('view') // Always start in view mode
     try {
       const response = await fetch(`/api/skills/${skillName}`)
       const data = await response.json()
@@ -199,13 +202,47 @@ export default function SkillsPage() {
             </div>
           ) : (
             <div className="mt-6 space-y-4">
-              <Textarea
-                value={editedContent}
-                onChange={(e) => setEditedContent(e.target.value)}
-                className="min-h-[calc(100vh-250px)] font-mono text-sm"
-                placeholder="Edit skill documentation..."
-              />
+              {/* Mode Tabs */}
+              <div className="flex gap-1 border-b">
+                <button
+                  onClick={() => setViewMode('view')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    viewMode === 'view'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Eye className="h-4 w-4 inline mr-2" />
+                  Preview
+                </button>
+                <button
+                  onClick={() => setViewMode('edit')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    viewMode === 'edit'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Code className="h-4 w-4 inline mr-2" />
+                  Edit
+                </button>
+              </div>
+
+              {/* Content */}
+              {viewMode === 'view' ? (
+                <div className="prose prose-sm dark:prose-invert max-w-none overflow-y-auto max-h-[calc(100vh-300px)] px-4">
+                  <ReactMarkdown>{editedContent}</ReactMarkdown>
+                </div>
+              ) : (
+                <Textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  className="min-h-[calc(100vh-300px)] font-mono text-sm"
+                  placeholder="Edit skill documentation..."
+                />
+              )}
               
+              {/* Actions */}
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="text-xs text-muted-foreground">
                   {editedContent !== selectedSkill?.content && (
