@@ -1,4 +1,6 @@
-import { listSkills } from "@/lib/clawdbot"
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,16 +13,48 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle } from "lucide-react"
+import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle, RefreshCw } from "lucide-react"
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+interface Skill {
+  name: string
+  path: string
+  description?: string
+  hasSkillMd: boolean
+}
 
-export default async function SkillsPage() {
-  const skills = await listSkills()
+export default function SkillsPage() {
+  const [skills, setSkills] = useState<Skill[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadSkills()
+  }, [])
+
+  const loadSkills = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/skills')
+      const data = await response.json()
+      setSkills(data.skills || [])
+    } catch (error) {
+      console.error('Failed to load skills:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
   
   const skillsWithDocs = skills.filter(s => s.hasSkillMd)
   const skillsWithoutDocs = skills.filter(s => !s.hasSkillMd)
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-6">
+        <div className="flex items-center justify-center h-64">
+          <RefreshCw className="h-8 w-8 animate-spin opacity-50" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 p-6">
@@ -43,6 +77,10 @@ export default async function SkillsPage() {
             </Badge>
           )}
         </div>
+        <Button onClick={loadSkills} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
       </div>
 
       {/* Tabs */}
