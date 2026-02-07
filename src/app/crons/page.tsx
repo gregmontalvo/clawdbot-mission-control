@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import {
   Table,
@@ -20,7 +19,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Search,
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
@@ -57,7 +55,7 @@ export default function CronsPage() {
   const [sortField, setSortField] = useState<SortField>('nextRun')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 15
+  const itemsPerPage = 50
 
   useEffect(() => {
     loadCrons()
@@ -168,109 +166,36 @@ export default function CronsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cron Jobs</h1>
-          <p className="text-muted-foreground">
-            Manage scheduled tasks and automation
-          </p>
-        </div>
+    <div className="flex-1 p-6">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Cron Jobs</h1>
           <Badge variant="outline" className="gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500" />
             {stats.enabled} Active
           </Badge>
-          <Button onClick={loadCrons} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          {stats.errors > 0 && (
+            <Badge variant="destructive" className="gap-2">
+              {stats.errors} Errors
+            </Badge>
+          )}
         </div>
+        <Button onClick={loadCrons} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
       </div>
-
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Jobs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Enabled</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.enabled}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Disabled</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-500">{stats.disabled}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Success</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.ok}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Errors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-500">{stats.errors}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search cron jobs..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  setCurrentPage(1)
-                }}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={showDisabled}
-                onCheckedChange={setShowDisabled}
-              />
-              <label className="text-sm text-muted-foreground cursor-pointer">
-                Show disabled
-              </label>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Table */}
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">Status</TableHead>
+              <TableRow className="border-b">
+                <TableHead className="w-[40px] h-10 py-2">Status</TableHead>
                 <TableHead 
-                  className="cursor-pointer select-none hover:bg-muted/50"
+                  className="h-10 py-2 cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center gap-2">
@@ -278,9 +203,9 @@ export default function CronsPage() {
                     {getSortIcon('name')}
                   </div>
                 </TableHead>
-                <TableHead className="w-[200px]">Schedule</TableHead>
+                <TableHead className="w-[180px] h-10 py-2">Schedule</TableHead>
                 <TableHead 
-                  className="w-[150px] cursor-pointer select-none hover:bg-muted/50"
+                  className="w-[120px] h-10 py-2 cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort('nextRun')}
                 >
                   <div className="flex items-center gap-2">
@@ -289,7 +214,7 @@ export default function CronsPage() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="w-[150px] cursor-pointer select-none hover:bg-muted/50"
+                  className="w-[120px] h-10 py-2 cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort('lastRun')}
                 >
                   <div className="flex items-center gap-2">
@@ -298,7 +223,7 @@ export default function CronsPage() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="w-[100px] cursor-pointer select-none hover:bg-muted/50"
+                  className="w-[80px] h-10 py-2 cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort('duration')}
                 >
                   <div className="flex items-center gap-2">
@@ -306,7 +231,7 @@ export default function CronsPage() {
                     {getSortIcon('duration')}
                   </div>
                 </TableHead>
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
+                <TableHead className="w-[90px] h-10 py-2 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -315,70 +240,45 @@ export default function CronsPage() {
                 const StatusIcon = statusInfo.icon
                 
                 return (
-                  <TableRow key={cron.id}>
-                    <TableCell>
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-full ${statusInfo.bgColor}`}>
-                        <StatusIcon className={`h-4 w-4 ${statusInfo.color}`} />
+                  <TableRow key={cron.id} className="h-12">
+                    <TableCell className="py-2">
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-full ${statusInfo.bgColor}`}>
+                        <StatusIcon className={`h-3 w-3 ${statusInfo.color}`} />
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{cron.name}</div>
-                        {cron.state?.lastError && (
-                          <div className="text-xs text-red-500 truncate max-w-md">
-                            {cron.state.lastError}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="font-mono text-xs">{cron.schedule.expr}</span>
-                      </div>
-                      {cron.schedule.tz && (
-                        <div className="text-xs text-muted-foreground">{cron.schedule.tz}</div>
+                    <TableCell className="py-2">
+                      <div className="text-sm font-medium truncate max-w-xs">{cron.name}</div>
+                      {cron.state?.lastError && (
+                        <div className="text-xs text-red-500 truncate max-w-xs">
+                          {cron.state.lastError}
+                        </div>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-2">
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="font-mono">{cron.schedule.expr}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-2">
                       {cron.state?.nextRunAtMs ? (
-                        <div>
-                          <div className="font-medium text-sm">
-                            {getTimeUntil(cron.state.nextRunAtMs)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {msToDate(cron.state.nextRunAtMs).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </div>
+                        <div className="text-sm">
+                          {getTimeUntil(cron.state.nextRunAtMs)}
                         </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-2">
                       {cron.state?.lastRunAtMs ? (
-                        <div>
-                          <div className="font-medium text-sm">
-                            {getTimeSince(cron.state.lastRunAtMs)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {msToDate(cron.state.lastRunAtMs).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </div>
+                        <div className="text-sm">
+                          {getTimeSince(cron.state.lastRunAtMs)}
                         </div>
                       ) : (
                         <span className="text-muted-foreground text-sm">Never</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-2">
                       {cron.state?.lastDurationMs ? (
                         <span className="font-mono text-sm">
                           {formatDuration(cron.state.lastDurationMs)}
@@ -387,15 +287,15 @@ export default function CronsPage() {
                         <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right py-2">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0"
+                          className="h-7 w-7 p-0"
                           title="Run now"
                         >
-                          <Play className="h-3.5 w-3.5" />
+                          <Play className="h-3 w-3" />
                         </Button>
                         <Switch
                           checked={cron.enabled}
@@ -414,24 +314,17 @@ export default function CronsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedCrons.length)} of {filteredAndSortedCrons.length} cron jobs
+        <div className="flex items-center justify-between px-2 py-3">
+          <div className="text-xs text-muted-foreground">
+            {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredAndSortedCrons.length)} of {filteredAndSortedCrons.length}
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(1)}
-              disabled={currentPage === 1}
-            >
-              First
-            </Button>
+          <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
+              className="h-8"
             >
               Previous
             </Button>
@@ -454,6 +347,7 @@ export default function CronsPage() {
                     variant={currentPage === pageNum ? "default" : "outline"}
                     size="sm"
                     onClick={() => setCurrentPage(pageNum)}
+                    className="h-8 w-8 p-0"
                   >
                     {pageNum}
                   </Button>
@@ -465,16 +359,9 @@ export default function CronsPage() {
               size="sm"
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className="h-8"
             >
               Next
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(totalPages)}
-              disabled={currentPage === totalPages}
-            >
-              Last
             </Button>
           </div>
         </div>
