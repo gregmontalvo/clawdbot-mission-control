@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import cronstrue from "cronstrue/i18n";
 
 interface CronJob {
@@ -240,9 +240,8 @@ export default function CalendarioPage() {
 
           {/* Time rows */}
           {HOURS.map((hour) => (
-            <>
+            <Fragment key={`row-${hour}`}>
               <div
-                key={`hour-${hour}`}
                 className="sticky left-0 z-10 border-b border-r border-border bg-card p-2"
               >
                 <span className="text-xs text-muted-foreground">
@@ -286,7 +285,7 @@ export default function CalendarioPage() {
                   </div>
                 );
               })}
-            </>
+            </Fragment>
           ))}
         </div>
       </div>
