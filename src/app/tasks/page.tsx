@@ -1,11 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { CheckSquare, Clock, ListTodo, AlertTriangle, RefreshCw, FileText, Folder, Bell } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { CheckSquare, Clock, ListTodo, AlertTriangle, RefreshCw, FileText, Folder, Bell, CheckCircle2, Circle } from "lucide-react"
 
 interface Task {
   id: string
@@ -37,7 +45,7 @@ export default function TasksPage() {
     low: 0
   })
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'high'>('pending')
+  const [activeTab, setActiveTab] = useState<'pending' | 'completed' | 'high'>('pending')
 
   useEffect(() => {
     loadTasks()
@@ -60,31 +68,31 @@ export default function TasksPage() {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'todo':
-        return <CheckSquare className="h-4 w-4" />
+        return <CheckSquare className="h-3 w-3" />
       case 'reminder':
-        return <Bell className="h-4 w-4" />
+        return <Bell className="h-3 w-3" />
       case 'project':
-        return <Folder className="h-4 w-4" />
+        return <Folder className="h-3 w-3" />
       case 'crm':
-        return <FileText className="h-4 w-4" />
+        return <FileText className="h-3 w-3" />
       default:
-        return <ListTodo className="h-4 w-4" />
+        return <ListTodo className="h-3 w-3" />
     }
   }
 
-  const getPriorityColor = (priority?: string) => {
+  const getPriorityBadge = (priority?: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-500/10 text-red-500 border-red-500/20'
+        return <Badge variant="destructive" className="text-xs">HIGH</Badge>
       case 'medium':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+        return <Badge variant="default" className="text-xs">MED</Badge>
       default:
-        return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+        return <Badge variant="secondary" className="text-xs">LOW</Badge>
     }
   }
 
   const filteredTasks = tasks.filter(task => {
-    switch (filter) {
+    switch (activeTab) {
       case 'pending':
         return !task.completed
       case 'completed':
@@ -92,221 +100,147 @@ export default function TasksPage() {
       case 'high':
         return !task.completed && task.priority === 'high'
       default:
-        return true
+        return !task.completed
     }
   })
 
-  const pendingTasks = filteredTasks.filter(t => !t.completed)
-  const completedTasks = filteredTasks.filter(t => t.completed)
+  if (loading) {
+    return (
+      <div className="flex-1 p-6">
+        <div className="flex items-center justify-center h-64">
+          <RefreshCw className="h-8 w-8 animate-spin opacity-50" />
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex-1 space-y-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-muted-foreground">
-            Pending and completed tasks from memory, projects, and heartbeat
-          </p>
+    <div className="flex-1 p-6">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Tasks</h1>
+          <Badge variant="outline" className="gap-2">
+            <ListTodo className="h-3 w-3" />
+            {stats.total} Total
+          </Badge>
+          <Badge variant="outline" className="gap-2">
+            <Clock className="h-3 w-3 text-blue-500" />
+            {stats.pending} Pending
+          </Badge>
+          {stats.high > 0 && (
+            <Badge variant="destructive" className="gap-2">
+              <AlertTriangle className="h-3 w-3" />
+              {stats.high} Urgent
+            </Badge>
+          )}
         </div>
-        <Button onClick={loadTasks} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+        <Button onClick={loadTasks} variant="outline" size="sm">
+          <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="cursor-pointer" onClick={() => setFilter('all')}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <ListTodo className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              All tasks
-            </p>
-          </CardContent>
-        </Card>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mb-4">
+        <TabsList>
+          <TabsTrigger value="pending">
+            <Clock className="h-3.5 w-3.5 mr-1.5" />
+            Pending ({stats.pending})
+          </TabsTrigger>
+          <TabsTrigger value="high">
+            <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />
+            High Priority ({stats.high})
+          </TabsTrigger>
+          <TabsTrigger value="completed">
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+            Completed ({stats.completed})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-        <Card className="cursor-pointer" onClick={() => setFilter('pending')}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">
-              Tasks awaiting action
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer" onClick={() => setFilter('high')}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Priority</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-500">{stats.high}</div>
-            <p className="text-xs text-muted-foreground">
-              Urgent tasks
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer" onClick={() => setFilter('completed')}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-            <CheckSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">
-              Last 7 days
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filter Buttons */}
-      <div className="flex gap-2">
-        <Button
-          variant={filter === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('all')}
-        >
-          All
-        </Button>
-        <Button
-          variant={filter === 'pending' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('pending')}
-        >
-          Pending
-        </Button>
-        <Button
-          variant={filter === 'high' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('high')}
-        >
-          High Priority
-        </Button>
-        <Button
-          variant={filter === 'completed' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('completed')}
-        >
-          Completed
-        </Button>
-      </div>
-
-      {/* Tasks Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Pending Tasks */}
-        {pendingTasks.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Tasks</CardTitle>
-              <CardDescription>{pendingTasks.length} tasks to complete</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[500px]">
-                <div className="space-y-3">
-                  {pendingTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                    >
-                      <div className="flex-shrink-0 mt-1">
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          {filteredTasks.length === 0 ? (
+            <div className="py-12 text-center">
+              <ListTodo className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-muted-foreground">No tasks found</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b">
+                  <TableHead className="w-[40px] h-10 py-2">Status</TableHead>
+                  <TableHead className="w-[80px] h-10 py-2">Priority</TableHead>
+                  <TableHead className="w-[80px] h-10 py-2">Category</TableHead>
+                  <TableHead className="h-10 py-2">Task</TableHead>
+                  <TableHead className="w-[120px] h-10 py-2">Source</TableHead>
+                  <TableHead className="w-[250px] h-10 py-2">File</TableHead>
+                  <TableHead className="w-[100px] h-10 py-2 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTasks.map((task) => (
+                  <TableRow key={task.id} className="h-12">
+                    <TableCell className="py-2">
+                      {task.completed ? (
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10">
+                          <CheckCircle2 className="h-3 w-3 text-green-500" />
+                        </div>
+                      ) : (
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500/10">
+                          <Circle className="h-3 w-3 text-blue-500" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {getPriorityBadge(task.priority)}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Badge variant="outline" className="gap-1">
                         {getCategoryIcon(task.category)}
+                        <span className="text-xs">{task.category}</span>
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className={`text-sm ${task.completed ? 'line-through opacity-60' : ''}`}>
+                        {task.text}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge className={getPriorityColor(task.priority)}>
-                            {task.priority?.toUpperCase() || 'LOW'}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {task.source}
-                          </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {task.source}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {task.file ? (
+                        <div className="text-xs font-mono text-muted-foreground truncate">
+                          {task.file}
                         </div>
-                        <p className="text-sm">{task.text}</p>
-                        {task.file && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {task.file}
-                          </p>
-                        )}
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right py-2">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title={task.completed ? "Mark incomplete" : "Mark complete"}
+                        >
+                          {task.completed ? <Circle className="h-3 w-3" /> : <CheckCircle2 className="h-3 w-3" />}
+                        </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Completed Tasks */}
-        {completedTasks.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Completed Tasks</CardTitle>
-              <CardDescription>{completedTasks.length} tasks done</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[500px]">
-                <div className="space-y-3">
-                  {completedTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      className="flex items-start gap-3 p-3 rounded-lg border opacity-60"
-                    >
-                      <div className="flex-shrink-0 mt-1">
-                        <CheckSquare className="h-4 w-4 text-green-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="text-xs">
-                            {task.source}
-                          </Badge>
-                        </div>
-                        <p className="text-sm line-through">{task.text}</p>
-                        {task.file && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {task.file}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Empty State */}
-      {filteredTasks.length === 0 && !loading && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">
-              {filter === 'completed' ? 'No completed tasks in the last 7 days' : 'No pending tasks found'}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RefreshCw className="h-12 w-12 mx-auto mb-4 opacity-50 animate-spin" />
-            <p className="text-muted-foreground">Loading tasks...</p>
-          </CardContent>
-        </Card>
-      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

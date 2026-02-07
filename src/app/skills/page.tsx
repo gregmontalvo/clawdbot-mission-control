@@ -1,8 +1,17 @@
 import { listSkills } from "@/lib/clawdbot"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Blocks, FileText, FolderOpen } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -14,143 +23,144 @@ export default async function SkillsPage() {
   const skillsWithoutDocs = skills.filter(s => !s.hasSkillMd)
 
   return (
-    <div className="flex-1 space-y-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Skills</h1>
-          <p className="text-muted-foreground">
-            Installed agent skills and capabilities
-          </p>
+    <div className="flex-1 p-6">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Skills</h1>
+          <Badge variant="outline" className="gap-2">
+            <Blocks className="h-3 w-3" />
+            {skills.length} Total
+          </Badge>
+          <Badge variant="outline" className="gap-2">
+            <CheckCircle2 className="h-3 w-3 text-green-500" />
+            {skillsWithDocs.length} Documented
+          </Badge>
+          {skillsWithoutDocs.length > 0 && (
+            <Badge variant="outline" className="gap-2">
+              <XCircle className="h-3 w-3 text-orange-500" />
+              {skillsWithoutDocs.length} Missing Docs
+            </Badge>
+          )}
         </div>
-        <Badge variant="outline" className="gap-2">
-          <Blocks className="h-4 w-4" />
-          {skills.length} Total
-        </Badge>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Skills</CardTitle>
-            <Blocks className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{skills.length}</div>
-          </CardContent>
-        </Card>
+      {/* Tabs */}
+      <Tabs defaultValue="all" className="mb-4">
+        <TabsList>
+          <TabsTrigger value="all">All ({skills.length})</TabsTrigger>
+          <TabsTrigger value="documented">
+            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            Documented ({skillsWithDocs.length})
+          </TabsTrigger>
+          {skillsWithoutDocs.length > 0 && (
+            <TabsTrigger value="missing">
+              Missing Docs ({skillsWithoutDocs.length})
+            </TabsTrigger>
+          )}
+        </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">With Documentation</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{skillsWithDocs.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round((skillsWithDocs.length / skills.length) * 100)}% coverage
-            </p>
-          </CardContent>
-        </Card>
+        <TabsContent value="all">
+          <SkillsTable skills={skills} />
+        </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Missing Docs</CardTitle>
-            <FolderOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{skillsWithoutDocs.length}</div>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="documented">
+          <SkillsTable skills={skillsWithDocs} />
+        </TabsContent>
 
-      {/* Skills with Documentation */}
-      {skillsWithDocs.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Documented Skills</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {skillsWithDocs.map((skill) => (
-              <Card key={skill.name}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{skill.name}</CardTitle>
-                      {skill.description && (
-                        <CardDescription className="mt-1">
-                          {skill.description}
-                        </CardDescription>
-                      )}
+        <TabsContent value="missing">
+          <SkillsTable skills={skillsWithoutDocs} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+function SkillsTable({ skills }: { skills: any[] }) {
+  if (skills.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <Blocks className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p className="text-muted-foreground">No skills found</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b">
+              <TableHead className="w-[40px] h-10 py-2">Docs</TableHead>
+              <TableHead className="h-10 py-2">Name</TableHead>
+              <TableHead className="h-10 py-2">Description</TableHead>
+              <TableHead className="w-[400px] h-10 py-2">Path</TableHead>
+              <TableHead className="w-[180px] h-10 py-2 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {skills.map((skill) => (
+              <TableRow key={skill.name} className="h-12">
+                <TableCell className="py-2">
+                  {skill.hasSkillMd ? (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10">
+                      <CheckCircle2 className="h-3 w-3 text-green-500" />
                     </div>
-                    <Badge variant="outline" className="gap-1">
-                      <FileText className="h-3 w-3" />
-                      Docs
-                    </Badge>
+                  ) : (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-500/10">
+                      <XCircle className="h-3 w-3 text-orange-500" />
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell className="py-2">
+                  <div className="font-medium">{skill.name}</div>
+                </TableCell>
+                <TableCell className="py-2">
+                  <div className="text-sm text-muted-foreground truncate max-w-md">
+                    {skill.description || '-'}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground font-mono truncate">
+                </TableCell>
+                <TableCell className="py-2">
+                  <div className="text-xs font-mono text-muted-foreground truncate">
                     {skill.path}
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <Button variant="outline" size="sm" asChild>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right py-2">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2"
+                      asChild
+                    >
                       <a href={`file://${skill.path}`} target="_blank" rel="noopener noreferrer">
                         <FolderOpen className="h-3 w-3 mr-1" />
-                        Open Folder
+                        Folder
                       </a>
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={`file://${skill.path}/SKILL.md`} target="_blank" rel="noopener noreferrer">
-                        <FileText className="h-3 w-3 mr-1" />
-                        View SKILL.md
-                      </a>
-                    </Button>
+                    {skill.hasSkillMd && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2"
+                        asChild
+                      >
+                        <a href={`file://${skill.path}/SKILL.md`} target="_blank" rel="noopener noreferrer">
+                          <FileText className="h-3 w-3 mr-1" />
+                          Docs
+                        </a>
+                      </Button>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                </TableCell>
+              </TableRow>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* Skills without Documentation */}
-      {skillsWithoutDocs.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Skills Missing Documentation</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {skillsWithoutDocs.map((skill) => (
-              <Card key={skill.name} className="opacity-60">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{skill.name}</CardTitle>
-                    <Badge variant="secondary">No Docs</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground font-mono truncate">
-                    {skill.path}
-                  </p>
-                  <Button variant="outline" size="sm" className="mt-3" asChild>
-                    <a href={`file://${skill.path}`} target="_blank" rel="noopener noreferrer">
-                      <FolderOpen className="h-3 w-3 mr-1" />
-                      Open Folder
-                    </a>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {skills.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Blocks className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-muted-foreground">No skills found</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
 }
