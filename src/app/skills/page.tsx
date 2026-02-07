@@ -31,6 +31,7 @@ interface Skill {
   path: string
   description?: string
   hasSkillMd: boolean
+  tags?: string[]
 }
 
 interface SkillDetail {
@@ -47,6 +48,7 @@ export default function SkillsPage() {
   const [saving, setSaving] = useState(false)
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [viewMode, setViewMode] = useState<'view' | 'edit'>('view')
+  const [selectedTag, setSelectedTag] = useState<string>('all')
 
   useEffect(() => {
     loadSkills()
@@ -107,8 +109,22 @@ export default function SkillsPage() {
     setEditedContent('')
   }
   
-  const skillsWithDocs = skills.filter(s => s.hasSkillMd)
-  const skillsWithoutDocs = skills.filter(s => !s.hasSkillMd)
+  // Get all unique tags
+  const allTags = Array.from(
+    new Set(
+      skills
+        .flatMap(s => s.tags || [])
+        .filter(Boolean)
+    )
+  ).sort()
+  
+  // Filter skills by tag
+  const filteredSkills = selectedTag === 'all' 
+    ? skills 
+    : skills.filter(s => s.tags?.includes(selectedTag))
+  
+  const skillsWithDocs = filteredSkills.filter(s => s.hasSkillMd)
+  const skillsWithoutDocs = filteredSkills.filter(s => !s.hasSkillMd)
 
   if (loading) {
     return (
@@ -147,10 +163,39 @@ export default function SkillsPage() {
         </Button>
       </div>
 
+      {/* Tag Filters */}
+      {allTags.length > 0 && (
+        <div className="mb-4 flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-muted-foreground">Tags:</span>
+          <Button
+            variant={selectedTag === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedTag('all')}
+            className="h-7"
+          >
+            All ({skills.length})
+          </Button>
+          {allTags.map(tag => {
+            const count = skills.filter(s => s.tags?.includes(tag)).length
+            return (
+              <Button
+                key={tag}
+                variant={selectedTag === tag ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedTag(tag)}
+                className="h-7"
+              >
+                {tag} ({count})
+              </Button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Tabs */}
       <Tabs defaultValue="all" className="mb-4">
         <TabsList>
-          <TabsTrigger value="all">All ({skills.length})</TabsTrigger>
+          <TabsTrigger value="all">All ({filteredSkills.length})</TabsTrigger>
           <TabsTrigger value="documented">
             <FileText className="h-3.5 w-3.5 mr-1.5" />
             Documented ({skillsWithDocs.length})
@@ -163,7 +208,7 @@ export default function SkillsPage() {
         </TabsList>
 
         <TabsContent value="all">
-          <SkillsTable skills={skills} onViewDocs={loadSkillDetail} />
+          <SkillsTable skills={filteredSkills} onViewDocs={loadSkillDetail} />
         </TabsContent>
 
         <TabsContent value="documented">
@@ -304,7 +349,8 @@ function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (nam
               <TableHead className="w-[40px] h-10 py-2">Docs</TableHead>
               <TableHead className="h-10 py-2">Name</TableHead>
               <TableHead className="h-10 py-2">Description</TableHead>
-              <TableHead className="w-[400px] h-10 py-2">Path</TableHead>
+              <TableHead className="w-[200px] h-10 py-2">Tags</TableHead>
+              <TableHead className="w-[350px] h-10 py-2">Path</TableHead>
               <TableHead className="w-[180px] h-10 py-2 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -328,6 +374,19 @@ function SkillsTable({ skills, onViewDocs }: { skills: Skill[], onViewDocs: (nam
                 <TableCell className="py-2">
                   <div className="text-sm text-muted-foreground truncate max-w-md">
                     {skill.description || '-'}
+                  </div>
+                </TableCell>
+                <TableCell className="py-2">
+                  <div className="flex gap-1 flex-wrap">
+                    {skill.tags && skill.tags.length > 0 ? (
+                      skill.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                          {tag}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground">-</span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="py-2">
