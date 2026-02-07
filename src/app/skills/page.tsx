@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Blocks, FileText, FolderOpen, CheckCircle2, XCircle, RefreshCw, Save, ExternalLink, Eye, Code } from "lucide-react"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 
 interface Skill {
   name: string
@@ -232,7 +233,7 @@ export default function SkillsPage() {
               {/* Content */}
               {viewMode === 'view' ? (
                 <div className="prose prose-sm dark:prose-invert max-w-none overflow-y-auto max-h-[calc(100vh-300px)] px-4 prose-p:my-4 prose-headings:mt-6 prose-headings:mb-4 prose-ul:my-4 prose-li:my-1 prose-pre:my-4 prose-blockquote:my-4">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
                     {editedContent}
                   </ReactMarkdown>
                 </div>
