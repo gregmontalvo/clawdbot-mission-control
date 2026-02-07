@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -22,7 +23,9 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
-  RefreshCw
+  RefreshCw,
+  Repeat,
+  Bell
 } from "lucide-react"
 import { getTimeUntil, getTimeSince, formatDuration, msToDate } from "@/lib/utils"
 
@@ -46,10 +49,23 @@ interface CronJob {
 
 type SortField = 'name' | 'nextRun' | 'lastRun' | 'status' | 'duration'
 type SortDirection = 'asc' | 'desc'
+type CronType = 'recurring' | 'oneoff'
+
+// Detect if a cron is recurring or one-off based on schedule
+function getCronType(schedule: CronJob['schedule']): CronType {
+  const expr = schedule.expr
+  // Recurring patterns: contains * or / (cron expressions)
+  // One-off: specific date/time (usually just numbers)
+  if (expr.includes('*') || expr.includes('/')) {
+    return 'recurring'
+  }
+  return 'oneoff'
+}
 
 export default function CronsPage() {
   const [crons, setCrons] = useState<CronJob[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'all' | 'recurring' | 'oneoff'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [showDisabled, setShowDisabled] = useState(true)
   const [sortField, setSortField] = useState<SortField>('nextRun')
@@ -108,7 +124,14 @@ export default function CronsPage() {
     let filtered = crons.filter(cron => {
       const matchesSearch = cron.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesDisabled = showDisabled || cron.enabled
-      return matchesSearch && matchesDisabled
+      
+      // Filter by tab
+      const cronType = getCronType(cron.schedule)
+      const matchesTab = activeTab === 'all' || 
+                        (activeTab === 'recurring' && cronType === 'recurring') ||
+                        (activeTab === 'oneoff' && cronType === 'oneoff')
+      
+      return matchesSearch && matchesDisabled && matchesTab
     })
 
     filtered.sort((a, b) => {
@@ -153,6 +176,8 @@ export default function CronsPage() {
     disabled: crons.filter(c => !c.enabled).length,
     errors: crons.filter(c => c.state?.lastStatus === 'error').length,
     ok: crons.filter(c => c.state?.lastStatus === 'ok').length,
+    recurring: crons.filter(c => getCronType(c.schedule) === 'recurring').length,
+    oneoff: crons.filter(c => getCronType(c.schedule) === 'oneoff').length,
   }), [crons])
 
   if (loading) {
@@ -187,6 +212,26 @@ export default function CronsPage() {
         </Button>
       </div>
 
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={(v) => {
+        setActiveTab(v as any)
+        setCurrentPage(1)
+      }} className="mb-4">
+        <TabsList>
+          <TabsTrigger value="all">
+            All ({stats.total})
+          </TabsTrigger>
+          <TabsTrigger value="recurring">
+            <Repeat className="h-3.5 w-3.5 mr-1.5" />
+            Recurring ({stats.recurring})
+          </TabsTrigger>
+          <TabsTrigger value="oneoff">
+            <Bell className="h-3.5 w-3.5 mr-1.5" />
+            One-offs ({stats.oneoff})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       {/* Table */}
       <Card>
         <CardContent className="p-0">
@@ -194,6 +239,7 @@ export default function CronsPage() {
             <TableHeader>
               <TableRow className="border-b">
                 <TableHead className="w-[40px] h-10 py-2">Status</TableHead>
+                <TableHead className="w-[90px] h-10 py-2">Type</TableHead>
                 <TableHead 
                   className="h-10 py-2 cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort('name')}
@@ -203,7 +249,7 @@ export default function CronsPage() {
                     {getSortIcon('name')}
                   </div>
                 </TableHead>
-                <TableHead className="w-[180px] h-10 py-2">Schedule</TableHead>
+                <TableHead className="w-[160px] h-10 py-2">Schedule</TableHead>
                 <TableHead 
                   className="w-[120px] h-10 py-2 cursor-pointer select-none hover:bg-muted/50"
                   onClick={() => handleSort('nextRun')}
@@ -238,6 +284,7 @@ export default function CronsPage() {
               {paginatedCrons.map((cron) => {
                 const statusInfo = getStatusInfo(cron)
                 const StatusIcon = statusInfo.icon
+                const cronType = getCronType(cron.schedule)
                 
                 return (
                   <TableRow key={cron.id} className="h-12">
@@ -245,6 +292,19 @@ export default function CronsPage() {
                       <div className={`flex h-6 w-6 items-center justify-center rounded-full ${statusInfo.bgColor}`}>
                         <StatusIcon className={`h-3 w-3 ${statusInfo.color}`} />
                       </div>
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {cronType === 'recurring' ? (
+                        <Badge variant="secondary" className="gap-1">
+                          <Repeat className="h-3 w-3" />
+                          <span className="text-xs">Recurring</span>
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1">
+                          <Bell className="h-3 w-3" />
+                          <span className="text-xs">One-off</span>
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="py-2">
                       <div className="text-sm font-medium truncate max-w-xs">{cron.name}</div>
