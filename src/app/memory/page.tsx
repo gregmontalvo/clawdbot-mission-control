@@ -1,12 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { FileText, Folder, Save, X, Search, Filter, Tag as TagIcon } from "lucide-react"
+import { FileText, Folder, Save, X, Search } from "lucide-react"
 
 interface MemoryFile {
   name: string
@@ -77,11 +76,9 @@ export default function MemoryPage() {
   }
 
   const loadFile = async (relativePath: string) => {
-    console.log('Loading file:', relativePath)
     try {
       const response = await fetch(`/api/memory/read?path=${encodeURIComponent(relativePath)}`)
       const data = await response.json()
-      console.log('Loaded content:', data.content?.substring(0, 100))
       setFileContent(data.content || '')
       setOriginalContent(data.content || '')
       setSelectedFile(relativePath)
@@ -145,12 +142,10 @@ export default function MemoryPage() {
   }
 
   const filteredFiles = files.filter(file => {
-    // Filtro por búsqueda
     if (searchQuery && !file.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false
     }
     
-    // Filtro por tags
     if (selectedTags.length > 0) {
       const tags = getFileTags(file.relativePath)
       if (!selectedTags.some(t => tags.includes(t))) {
@@ -162,10 +157,10 @@ export default function MemoryPage() {
   })
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] p-8 gap-4">
+    <div className="flex h-screen p-8 gap-4 overflow-hidden">
       {/* File List Sidebar */}
-      <Card className="w-96 flex flex-col">
-        <CardHeader className="pb-3">
+      <Card className="w-96 flex flex-col h-full overflow-hidden">
+        <CardHeader className="pb-3 flex-shrink-0">
           <CardTitle>Memory Files</CardTitle>
           <CardDescription>
             {filteredFiles.filter(f => !f.isDirectory).length} files
@@ -201,68 +196,66 @@ export default function MemoryPage() {
           </div>
         </CardHeader>
         
-        <CardContent className="flex-1 p-0">
-          <ScrollArea className="h-full">
-            <div className="space-y-1 p-4">
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Loading...</p>
-              ) : (
-                filteredFiles.map((file) => {
-                  const fileTags = getFileTags(file.relativePath)
-                  return (
-                    <button
-                      key={file.relativePath}
-                      onClick={() => !file.isDirectory && loadFile(file.relativePath)}
-                      disabled={file.isDirectory}
-                      className={`w-full flex flex-col gap-1 p-2 rounded-lg text-left transition-colors ${
-                        selectedFile === file.relativePath
-                          ? 'bg-primary text-primary-foreground'
-                          : file.isDirectory
-                          ? 'text-muted-foreground cursor-default'
-                          : 'hover:bg-accent'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        {file.isDirectory ? (
-                          <Folder className="h-4 w-4 flex-shrink-0" />
-                        ) : (
-                          <FileText className="h-4 w-4 flex-shrink-0" />
-                        )}
-                        <p className="text-sm font-medium truncate flex-1 min-w-0">{file.name}</p>
-                      </div>
-                      
-                      {!file.isDirectory && (
-                        <>
-                          <p className="text-xs opacity-70 pl-6 truncate">
-                            {formatSize(file.size)} • {formatDate(file.modified)}
-                          </p>
-                          
-                          {fileTags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 pl-6 min-w-0">
-                              {fileTags.map(tag => (
-                                <span
-                                  key={tag}
-                                  className={`px-1.5 py-0.5 rounded text-[10px] border flex-shrink-0 ${TAG_COLORS[tag]}`}
-                                >
-                                  {tags[tag]?.label || tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </>
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="space-y-1">
+            {loading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              filteredFiles.map((file) => {
+                const fileTags = getFileTags(file.relativePath)
+                return (
+                  <button
+                    key={file.relativePath}
+                    onClick={() => !file.isDirectory && loadFile(file.relativePath)}
+                    disabled={file.isDirectory}
+                    className={`w-full flex flex-col gap-1 p-2 rounded-lg text-left transition-colors ${
+                      selectedFile === file.relativePath
+                        ? 'bg-primary text-primary-foreground'
+                        : file.isDirectory
+                        ? 'text-muted-foreground cursor-default'
+                        : 'hover:bg-accent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      {file.isDirectory ? (
+                        <Folder className="h-4 w-4 flex-shrink-0" />
+                      ) : (
+                        <FileText className="h-4 w-4 flex-shrink-0" />
                       )}
-                    </button>
-                  )
-                })
-              )}
-            </div>
-          </ScrollArea>
-        </CardContent>
+                      <p className="text-sm font-medium truncate flex-1 min-w-0">{file.name}</p>
+                    </div>
+                    
+                    {!file.isDirectory && (
+                      <>
+                        <p className="text-xs opacity-70 pl-6 truncate">
+                          {formatSize(file.size)} • {formatDate(file.modified)}
+                        </p>
+                        
+                        {fileTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pl-6 min-w-0">
+                            {fileTags.map(tag => (
+                              <span
+                                key={tag}
+                                className={`px-1.5 py-0.5 rounded text-[10px] border flex-shrink-0 ${TAG_COLORS[tag]}`}
+                              >
+                                {tags[tag]?.label || tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </button>
+                )
+              })
+            )}
+          </div>
+        </div>
       </Card>
 
       {/* Editor */}
-      <Card className="flex-1 flex flex-col">
-        <CardHeader>
+      <Card className="flex-1 flex flex-col h-full overflow-hidden">
+        <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <CardTitle className="truncate">
@@ -304,7 +297,7 @@ export default function MemoryPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="flex-1 p-0 overflow-hidden">
+        <div className="flex-1 overflow-hidden">
           {selectedFile ? (
             <textarea
               value={fileContent}
@@ -322,7 +315,7 @@ export default function MemoryPage() {
               </div>
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
     </div>
   )
