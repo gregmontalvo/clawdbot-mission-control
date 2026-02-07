@@ -178,7 +178,7 @@ export default function CronsPage() {
     })
 
     return filtered
-  }, [crons, searchQuery, showDisabled, sortField, sortDirection])
+  }, [crons, searchQuery, showDisabled, sortField, sortDirection, activeTab])
 
   const paginatedCrons = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
